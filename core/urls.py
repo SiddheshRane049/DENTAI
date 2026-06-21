@@ -23,12 +23,12 @@ urlpatterns = [
     # ── Scans ─────────────────────────────────────────────────────────
     path('scans/upload/',                           ScanUploadView.as_view(),          name='api-scan-upload'),
     path('scans/',                                  ScanListView.as_view(),            name='api-scan-list'),
-    path('scans/<int:pk>/',                         ScanDetailView.as_view(),          name='api-scan-detail'),
-    path('scans/<int:pk>/status/',                  ScanStatusView.as_view(),          name='api-scan-status'),
+    path('scans/<str:pk>/',                         ScanDetailView.as_view(),          name='api-scan-detail'),
+    path('scans/<str:pk>/status/',                  ScanStatusView.as_view(),          name='api-scan-status'),
 
     # ── Reports ───────────────────────────────────────────────────────
-    path('scans/<int:pk>/report/',                  ReportGenerateView.as_view(),      name='api-report-generate'),
-    path('scans/<int:pk>/report/download/',         ReportDownloadView.as_view(),      name='api-report-download'),
+    path('scans/<str:pk>/report/',                  ReportGenerateView.as_view(),      name='api-report-generate'),
+    path('scans/<str:pk>/report/download/',         ReportDownloadView.as_view(),      name='api-report-download'),
 
     # ── Patients ──────────────────────────────────────────────────────
     path('patients/',                               PatientListCreateView.as_view(),   name='api-patient-list'),

@@ -216,6 +216,26 @@ class ScanUploadView(APIView):
             logger.error(f"Detection failed for scan {scan_id}: {e}", exc_info=True)
             Scan.objects.filter(id=scan_id).update(status='failed')
 
+def _get_scan_by_pk_or_uuid(pk, select_related_patient=False, prefetch_results=False):
+    import uuid
+    from django.http import Http404
+    from .models import Scan
+
+    qs = Scan.objects.all()
+    if select_related_patient:
+        qs = qs.select_related('patient')
+    if prefetch_results:
+        qs = qs.prefetch_related('results')
+
+    try:
+        val = uuid.UUID(str(pk))
+        return qs.get(scan_id=val)
+    except (ValueError, TypeError, Scan.DoesNotExist):
+        try:
+            return qs.get(pk=int(pk))
+        except (ValueError, TypeError, Scan.DoesNotExist):
+            raise Http404("Scan not found")
+
 
 # ─── Scan Status Polling ──────────────────────────────────────────────────────
 
@@ -226,11 +246,8 @@ class ScanStatusView(APIView):
     """
 
     def get(self, request, pk):
-        try:
-            scan = Scan.objects.get(pk=pk)
-            return Response({'status': scan.status, 'scan_id': str(scan.scan_id)})
-        except Scan.DoesNotExist:
-            raise Http404
+        scan = _get_scan_by_pk_or_uuid(pk)
+        return Response({'status': scan.status, 'scan_id': str(scan.scan_id)})
 
 
 # ─── Scan Detail ─────────────────────────────────────────────────────────────
@@ -240,8 +257,11 @@ class ScanDetailView(generics.RetrieveAPIView):
     GET /api/scans/<id>/
     Full scan details with all detection results (for Results page).
     """
-    queryset         = Scan.objects.prefetch_related('results')
     serializer_class = ScanSerializer
+
+    def get_object(self):
+        pk = self.kwargs.get('pk')
+        return _get_scan_by_pk_or_uuid(pk, select_related_patient=True, prefetch_results=True)
 
     def get_serializer_context(self):
         ctx = super().get_serializer_context()
@@ -328,10 +348,7 @@ class ReportGenerateView(APIView):
     """
 
     def post(self, request, pk):
-        try:
-            scan = Scan.objects.prefetch_related('results').get(pk=pk)
-        except Scan.DoesNotExist:
-            raise Http404
+        scan = _get_scan_by_pk_or_uuid(pk, prefetch_results=True)
 
         if scan.status != 'completed':
             return Response(
@@ -374,10 +391,7 @@ class ReportDownloadView(APIView):
     """
 
     def get(self, request, pk):
-        try:
-            scan = Scan.objects.get(pk=pk)
-        except Scan.DoesNotExist:
-            raise Http404
+        scan = _get_scan_by_pk_or_uuid(pk, select_related_patient=True)
 
         if not scan.report_pdf:
             return Response(
