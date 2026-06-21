@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DentAI — Generate Report</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
+  <style>
+    :root {
+      --teal:          #0d7377;
+      --teal-dark:     #0a5a5e;
+      --teal-light:    #e6f4f5;
+      --teal-mid:      #b2dfe0;
+      --coral:         #ff6b6b;
+      --coral-light:   #fff0f0;
+      --bg:            #f8fafb;
+      --surface:       #ffffff;
+      --border:        #e8ecef;
+      --text-primary:  #1a2332;
+      --text-secondary:#5a6a7a;
+      --text-muted:    #9aabb8;
+      --red:           #e53e3e;
+      --orange:        #dd6b20;
+      --green:         #276749;
+      --shadow-sm:     0 1px 4px rgba(13,115,119,0.06);
+      --shadow-md:     0 4px 20px rgba(13,115,119,0.10);
+      --radius-sm:     8px;
+      --radius-md:     14px;
+      --sidebar-w:     260px;
+      --transition:    0.22s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      display: flex;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Sidebar ──────────────────────────────────────────────────── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      position: fixed; height: 100vh; z-index: 100;
+      box-shadow: var(--shadow-sm);
+    }
+    .sidebar-logo { padding: 28px 24px 22px; border-bottom: 1px solid var(--border); }
+    .logo-mark { display: flex; align-items: center; gap: 10px; }
+    .logo-icon {
+      width: 38px; height: 38px;
+      background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 2px 8px rgba(13,115,119,0.25);
+    }
+    .logo-text h1 { font-family:'Lora',serif; font-size:19px; font-weight:700; color:var(--teal-dark); letter-spacing:-0.3px; }
+    .logo-text p  { font-size:10.5px; color:var(--text-muted); margin-top:1px; font-weight:500; letter-spacing:0.5px; text-transform:uppercase; }
+    .sidebar-nav { flex:1; padding:20px 12px; overflow-y:auto; }
+    .nav-section-label { font-size:10px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; padding:0 12px; margin:16px 0 6px; }
+    .nav-item { display:flex; align-items:center; gap:11px; padding:11px 14px; border-radius:var(--radius-sm); transition:all var(--transition); font-size:14px; font-weight:500; text-decoration:none; color:var(--text-secondary); margin-bottom:2px; position:relative; }
+    .nav-item:hover { background:var(--teal-light); color:var(--teal); }
+    .nav-item.active { background:var(--teal-light); color:var(--teal); font-weight:600; }
+    .nav-item.active::before { content:''; position:absolute; left:0; top:20%; bottom:20%; width:3px; background:var(--teal); border-radius:0 3px 3px 0; }
+    .nav-item .material-icons-round { font-size:19px; }
+    .sidebar-footer { padding:16px 20px; border-top:1px solid var(--border); }
+    .doctor-card { display:flex; align-items:center; gap:11px; padding:10px 12px; background:var(--bg); border-radius:var(--radius-sm); }
+    .doctor-avatar { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,var(--teal),var(--teal-dark)); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; color:white; flex-shrink:0; }
+    .doctor-name { font-size:13px; font-weight:600; color:var(--text-primary); }
+    .doctor-role { font-size:11px; color:var(--text-muted); margin-top:1px; }
+
+    /* ── Main ──────────────────────────────────────────────────────── */
+    .main { margin-left:var(--sidebar-w); flex:1; padding:36px 40px; }
+    .page-header { margin-bottom:28px; }
+    .page-header h2 { font-family:'Lora',serif; font-size:28px; font-weight:700; color:var(--text-primary); letter-spacing:-0.5px; }
+    .page-header p  { color:var(--text-secondary); margin-top:5px; font-size:14px; }
+
+    /* ── Report Layout ─────────────────────────────────────────────── */
+    .report-layout { display:grid; grid-template-columns:340px 1fr; gap:24px; }
+
+    /* ── Config Panel ──────────────────────────────────────────────── */
+    .config-card {
+      background: var(--surface);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      padding: 28px 24px;
+      animation: fadeUp 0.4s ease both;
+    }
+    .card-title {
+      display: flex; align-items: center; gap: 8px;
+      font-family: 'Lora', serif;
+      font-size: 17px; font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 20px;
+    }
+    .card-title .material-icons-round { color:var(--teal); font-size:20px; }
+
+    .patient-info-box {
+      background: var(--teal-light);
+      border: 1px solid var(--teal-mid);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      margin-bottom: 22px;
+    }
+    .patient-info-box .name { font-size:15px; font-weight:700; color:var(--teal-dark); }
+    .patient-info-box .meta { font-size:12px; color:var(--text-secondary); margin-top:4px; }
+
+    .checklist { margin-bottom: 22px; }
+    .checklist-label {
+      font-size:11px; font-weight:600; color:var(--text-muted);
+      text-transform:uppercase; letter-spacing:0.7px;
+      margin-bottom:10px;
+    }
+    .check-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 13.5px;
+      color: var(--text-secondary);
+      transition: background var(--transition);
+    }
+    .check-item:hover { background: var(--bg); }
+    .check-item input[type=checkbox] { width:16px; height:16px; accent-color:var(--teal); cursor:pointer; }
+
+    .form-group { display:flex; flex-direction:column; gap:7px; margin-bottom:18px; }
+    .form-group label { font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.7px; }
+    .form-group textarea {
+      padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 13.5px;
+      background: var(--bg);
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      resize: vertical;
+      color: var(--text-primary);
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .form-group textarea:focus {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 3px rgba(13,115,119,0.12);
+      background: var(--surface);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 13px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: opacity var(--transition), transform var(--transition), box-shadow var(--transition);
+      margin-bottom: 10px;
+      letter-spacing: 0.2px;
+    }
+    .btn-primary:hover:not(:disabled) {
+      opacity: 0.92;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(13,115,119,0.3);
+    }
+    .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    .btn-outline {
+      background: none;
+      color: var(--teal);
+      border: 1.5px solid var(--teal);
+      border-radius: var(--radius-sm);
+      padding: 12px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      text-decoration: none;
+      margin-bottom: 8px;
+      transition: background var(--transition), transform var(--transition);
+    }
+    .btn-outline:hover { background: var(--teal-light); transform: translateY(-1px); }
+
+    .status-msg {
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 13.5px;
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .status-success { background: #f0faf4; color: var(--green); border-left: 3px solid var(--green); }
+    .status-error   { background: var(--coral-light); color: var(--red); border-left: 3px solid var(--red); }
+    .status-info    { background: var(--teal-light); color: var(--teal-dark); border-left: 3px solid var(--teal); }
+
+    /* ── PDF Preview Panel ─────────────────────────────────────────── */
+    .preview-card {
+      background: var(--surface);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      padding: 28px 24px;
+      animation: fadeUp 0.4s 0.1s ease both;
+    }
+
+    .pdf-paper {
+      background: #fff;
+      border-radius: 6px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+      padding: 32px;
+      max-width: 660px;
+      font-size: 13px;
+      border: 1px solid var(--border);
+    }
+    .pdf-header {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      border-bottom: 2px solid var(--teal);
+      padding-bottom: 14px; margin-bottom: 18px;
+    }
+    .pdf-logo { font-family:'Lora',serif; font-size:20px; font-weight:700; color:var(--teal); }
+    .pdf-subtitle { font-size:10px; color:var(--text-muted); margin-top:2px; }
+    .pdf-title {
+      font-family: 'Lora', serif;
+      font-size: 15px; font-weight: 700;
+      text-align: center; color: var(--text-primary);
+      margin-bottom: 18px; letter-spacing: 0.5px;
+    }
+    .pdf-section { margin-bottom: 18px; }
+    .pdf-section h4 {
+      font-size: 10.5px; font-weight: 700; color: var(--teal);
+      text-transform: uppercase; letter-spacing: 0.8px;
+      margin-bottom: 10px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid var(--teal-light);
+    }
+    .pdf-table { width:100%; border-collapse:collapse; font-size:12px; }
+    .pdf-table th { background:var(--teal); color:#fff; padding:7px 11px; text-align:left; font-size:11px; font-weight:600; }
+    .pdf-table td { padding:7px 11px; border-bottom:1px solid var(--border); }
+    .pdf-table tr:nth-child(even) td { background:var(--bg); }
+    .sev-high { color:var(--red); font-weight:600; }
+    .sev-med  { color:var(--orange); font-weight:600; }
+    .sev-low  { color:var(--green); font-weight:600; }
+    .xray-preview { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:14px 0; }
+    .xray-box {
+      background: #111827;
+      border-radius: 8px; overflow:hidden;
+      aspect-ratio:4/3;
+      display:flex; align-items:center; justify-content:center;
+      color:#555; font-size:11px;
+      border: 1px solid #2a3040;
+    }
+    .xray-box img { width:100%; height:100%; object-fit:cover; }
+    .pdf-footer {
+      border-top: 1px solid var(--border);
+      padding-top: 12px; margin-top: 18px;
+      font-size: 10px; color: var(--text-muted);
+      display: flex; justify-content: space-between;
+    }
+
+    /* ── Loading ──────────────────────────────────────────────────── */
+    .loading { text-align:center; padding:40px; color:var(--text-muted); }
+    .spinner { width:32px; height:32px; border:3px solid var(--teal-light); border-top-color:var(--teal); border-radius:50%; animation:spin 0.7s linear infinite; margin:0 auto 12px; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">
+        <img src="/static/logo.png" alt="DentAI Logo" style="height: 38px; width: auto; display: block; object-fit: contain;">
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <a href="/dashboard/" class="nav-item"><span class="material-icons-round">dashboard</span> Dashboard</a>
+      <a href="/upload/"    class="nav-item"><span class="material-icons-round">add_circle_outline</span> New Scan</a>
+      <div class="nav-section-label">Clinical</div>
+      <a href="/results/"   class="nav-item"><span class="material-icons-round">biotech</span> Results</a>
+      <a href="/history/"   class="nav-item"><span class="material-icons-round">manage_history</span> Patient History</a>
+      <a href="/reports/"   class="nav-item active"><span class="material-icons-round">description</span> Reports</a>
+    </nav>
+
+  </aside>
+
+  <main class="main">
+    <div class="page-header">
+      <h2>Generate Report</h2>
+      <p>Create and download a clinical PDF report for the selected scan</p>
+    </div>
+
+    <div id="no-scan" class="status-msg status-info" style="display:none">
+      <span class="material-icons-round" style="font-size:18px">info</span>
+      No scan selected. <a href="/history/" style="color:var(--teal);font-weight:600;margin-left:4px">Select from Patient History →</a>
+    </div>
+
+    <div id="loading-state" class="loading">
+      <div class="spinner"></div>
+      <div>Loading scan data...</div>
+    </div>
+
+    <div id="report-layout" class="report-layout" style="display:none">
+
+      <!-- Configuration Panel -->
+      <div class="config-card">
+        <div class="card-title">
+          <span class="material-icons-round">tune</span>
+          Report Configuration
+        </div>
+
+        <div class="patient-info-box" id="patient-box">
+          <div class="name" id="patient-name">Loading...</div>
+          <div class="meta" id="patient-meta">—</div>
+        </div>
+
+        <div class="checklist">
+          <div class="checklist-label">Include Sections</div>
+          <div class="check-item"><input type="checkbox" checked disabled> Patient Details</div>
+          <div class="check-item"><input type="checkbox" checked id="chk-xray"> Annotated X-Ray</div>
+          <div class="check-item"><input type="checkbox" checked> Disease Summary</div>
+          <div class="check-item"><input type="checkbox" checked> Confidence Scores</div>
+          <div class="check-item"><input type="checkbox" checked> FDI Tooth Chart</div>
+          <div class="check-item"><input type="checkbox" checked> Recommended Next Steps</div>
+          <div class="check-item"><input type="checkbox" id="chk-notes"> Doctor Notes</div>
+        </div>
+
+        <div class="form-group">
+          <label>Doctor Notes</label>
+          <textarea id="doctor-notes" rows="4" placeholder="Add clinical observations to include in the report..."></textarea>
+        </div>
+
+        <button class="btn-primary" id="gen-btn" onclick="generateReport()">
+          <span class="material-icons-round">picture_as_pdf</span> Generate & Download PDF
+        </button>
+        <a id="download-link" class="btn-outline" style="display:none" href="#" target="_blank">
+          <span class="material-icons-round">download</span> Download Report
+        </a>
+        <div id="report-status" class="status-msg" style="display:none"></div>
+      </div>
+
+      <!-- PDF Preview Panel -->
+      <div class="preview-card">
+        <div class="card-title">
+          <span class="material-icons-round">preview</span>
+          Report Preview
+        </div>
+        <div class="pdf-paper" id="pdf-preview">
+          <div class="loading"><div class="spinner"></div><div>Loading preview...</div></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const API    = '/api';
+    const params = new URLSearchParams(window.location.search);
+    const scanId = params.get('scan');
+    let scanData = null;
+
+    async function loadScan() {
+      document.getElementById('loading-state').style.display = 'flex';
+
+      if (!scanId) {
+        document.getElementById('loading-state').style.display = 'none';
+        document.getElementById('no-scan').style.display       = 'block';
+        return;
+      }
+
+      try {
+        const res  = await fetch(`${API}/scans/${scanId}/`);
+        if (!res.ok) throw new Error('Scan not found');
+        scanData = await res.json();
+
+        document.getElementById('patient-name').textContent = scanData.patient_name;
+        document.getElementById('patient-meta').textContent =
+          `ID: ${scanData.scan_id?.slice(0,8).toUpperCase()} · ${scanData.scan_type} · ${new Date(scanData.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}`;
+
+        renderPreview(scanData);
+
+        document.getElementById('loading-state').style.display  = 'none';
+        document.getElementById('report-layout').style.display  = 'grid';
+
+      } catch (err) {
+        document.getElementById('loading-state').innerHTML =
+          `<div style="color:var(--red)">❌ ${err.message}</div>`;
+      }
+    }
+
+    function renderPreview(scan) {
+      const sev = s => `<span class="sev-${s==='high'?'high':s==='medium'?'med':'low'}">${s==='high'?'🔴 High':s==='medium'?'🟡 Medium':'🟢 Low'}</span>`;
+
+      const rows = (scan.results || []).map(r =>
+        `<tr><td>${r.disease_name}</td><td>${r.fdi_tooth_number ? 'T'+r.fdi_tooth_number : '—'}</td><td>${r.confidence_percent}%</td><td>${sev(r.severity)}</td></tr>`
+      ).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--green);padding:12px">✅ No diseases detected</td></tr>';
+
+      const origUrl = scan.original_image_url  || '';
+      const annoUrl = scan.annotated_image_url || '';
+
+      document.getElementById('pdf-preview').innerHTML = `
+        <div class="pdf-header">
+          <div>
+            <div class="pdf-logo" style="margin-bottom: 4px;"><img src="/static/logo.png" alt="DentAI Logo" style="height: 32px; width: auto; vertical-align: middle;"></div>
+            <div class="pdf-subtitle">AI Dental Diagnostic System</div>
+          </div>
+          <div style="text-align:right;font-size:11px;color:#9aabb8">Generated: ${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}</div>
+        </div>
+
+        <div class="pdf-title">DENTAL DIAGNOSIS REPORT</div>
+
+        <div class="pdf-section">
+          <h4>Patient Information</h4>
+          <table class="pdf-table">
+            <tr><th>Name</th><th>Scan Type</th><th>Date</th><th>Doctor Name</th><th>Findings</th></tr>
+            <tr><td>${scan.patient_name}</td><td>${scan.scan_type}</td><td>${new Date(scan.created_at).toLocaleDateString('en-GB')}</td><td>${scan.doctor_name || '—'}</td><td>${scan.disease_count}</td></tr>
+          </table>
+        </div>
+
+        <div class="pdf-section">
+          <h4>X-Ray Analysis</h4>
+          <div class="xray-preview">
+            <div class="xray-box">
+              ${origUrl ? `<img src="${origUrl}" alt="Original X-Ray" />` : '<span>Original X-Ray</span>'}
+            </div>
+            <div class="xray-box">
+              ${annoUrl ? `<img src="${annoUrl}" alt="Annotated X-Ray" />` : '<span>Annotated X-Ray</span>'}
+            </div>
+          </div>
+        </div>
+
+        <div class="pdf-section">
+          <h4>Detection Results</h4>
+          <table class="pdf-table">
+            <tr><th>Disease</th><th>Tooth (FDI)</th><th>Confidence</th><th>Severity</th></tr>
+            ${rows}
+          </table>
+        </div>
+
+        <div class="pdf-footer">
+          <span>DentAI — Confidential Medical Record</span>
+          <span>Page 1 of 1</span>
+        </div>
+      `;
+    }
+
+    async function generateReport() {
+      const btn    = document.getElementById('gen-btn');
+      const status = document.getElementById('report-status');
+      const notes  = document.getElementById('doctor-notes').value;
+
+      btn.disabled  = true;
+      btn.innerHTML = '<div style="width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite"></div> Generating PDF...';
+      status.className = 'status-msg status-info';
+      status.innerHTML = '<span class="material-icons-round" style="font-size:16px">hourglass_top</span> Generating clinical PDF report...';
+      status.style.display = 'flex';
+
+      try {
+        const res  = await fetch(`${API}/scans/${scanId}/report/`, {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ doctor_notes: notes }),
+        });
+        const data = await res.json();
+
+        if (data.report_url) {
+          const dlLink = document.getElementById('download-link');
+          dlLink.href  = `${API}/scans/${scanId}/report/download/`;
+          dlLink.style.display = 'flex';
+          status.className = 'status-msg status-success';
+          status.innerHTML = `<span class="material-icons-round" style="font-size:16px">check_circle</span> PDF ready! Click <b style="margin-left:4px">Download Report</b> above.`;
+        } else {
+          throw new Error(data.error || 'Generation failed');
+        }
+      } catch (err) {
+        status.className = 'status-msg status-error';
+        status.innerHTML = `<span class="material-icons-round" style="font-size:16px">error</span> ${err.message}`;
+      } finally {
+        btn.disabled  = false;
+        btn.innerHTML = '<span class="material-icons-round">picture_as_pdf</span> Generate & Download PDF';
+      }
+    }
+
+    loadScan();
+  </script>
+</body>
+</html>

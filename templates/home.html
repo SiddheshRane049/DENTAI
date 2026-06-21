@@ -1,0 +1,482 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Dent AI | Precision Clinical Intelligence</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- GSAP for Animations -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-background": "#191c1e",
+                    "surface-container-low": "#f2f4f6",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-on-surface": "#eff1f3",
+                    "surface-bright": "#f7f9fb",
+                    "on-primary-container": "#7c839b",
+                    "on-secondary-container": "#006172",
+                    "on-error-container": "#93000a",
+                    "surface-dim": "#d8dadc",
+                    "on-secondary-fixed-variant": "#004e5c",
+                    "tertiary": "#000000",
+                    "surface-tint": "#565e74",
+                    "on-tertiary": "#ffffff",
+                    "tertiary-fixed": "#6ffbbe",
+                    "on-primary-fixed": "#131b2e",
+                    "secondary-container": "#57dffe",
+                    "on-error": "#ffffff",
+                    "surface-container": "#eceef0",
+                    "surface-container-high": "#e6e8ea",
+                    "primary": "#000000",
+                    "on-tertiary-fixed": "#002113",
+                    "tertiary-container": "#002113",
+                    "inverse-primary": "#bec6e0",
+                    "secondary": "#00687a",
+                    "on-tertiary-fixed-variant": "#005236",
+                    "background": "#f7f9fb",
+                    "on-primary": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "inverse-surface": "#2d3133",
+                    "on-secondary-fixed": "#001f26",
+                    "on-surface": "#191c1e",
+                    "secondary-fixed": "#acedff",
+                    "primary-fixed": "#dae2fd",
+                    "on-primary-fixed-variant": "#3f465c",
+                    "primary-fixed-dim": "#bec6e0",
+                    "surface": "#f7f9fb",
+                    "secondary-fixed-dim": "#4cd7f6",
+                    "tertiary-fixed-dim": "#4edea3",
+                    "error": "#ba1a1a",
+                    "surface-variant": "#e0e3e5",
+                    "outline-variant": "#c6c6cd",
+                    "outline": "#76777d",
+                    "on-surface-variant": "#45464d",
+                    "primary-container": "#131b2e",
+                    "error-container": "#ffdad6",
+                    "surface-container-highest": "#e0e3e5",
+                    "on-tertiary-container": "#009668"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xs": "4px",
+                    "base": "8px",
+                    "sm": "12px",
+                    "container-max": "1440px",
+                    "margin-mobile": "16px",
+                    "lg": "48px",
+                    "gutter": "24px",
+                    "xl": "80px",
+                    "margin-desktop": "64px",
+                    "md": "24px"
+            },
+            "fontFamily": {
+                    "body-md": ["Inter", "sans-serif"],
+                    "headline-lg-mobile": ["Inter", "sans-serif"],
+                    "headline-lg": ["Inter", "sans-serif"],
+                    "title-lg": ["Inter", "sans-serif"],
+                    "headline-md": ["Inter", "sans-serif"],
+                    "display-lg": ["Inter", "sans-serif"],
+                    "label-md": ["Inter", "sans-serif"],
+                    "caption": ["Inter", "sans-serif"],
+                    "body-lg": ["Inter", "sans-serif"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "title-lg": ["20px", {"lineHeight": "28px", "fontWeight": "500"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "caption": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        body { font-family: 'Inter', sans-serif; background-color: #F8FAFC; color: #0F172A; }
+        .glass { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        .hero-gradient { background: radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.05) 0%, rgba(248, 250, 252, 0) 70%); }
+        
+        @keyframes shimmer {
+            0% { background-position: -200% center; }
+            100% { background-position: 200% center; }
+        }
+        .animate-shimmer {
+            background: linear-gradient(90deg, #06B6D4 0%, #10B981 40%, #06B6D4 60%, #10B981 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            animation: shimmer 4s linear infinite;
+        }
+
+        .btn-hover:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.4);
+        }
+
+        .feature-card-hover {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .feature-card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.2);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .scanning-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(to right, transparent, #06B6D4, transparent);
+            box-shadow: 0 0 15px #06B6D4;
+            z-index: 50;
+            animation: scan 3s linear infinite;
+        }
+        @keyframes scan {
+            0% { top: 0%; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+
+        .bounding-box {
+            position: absolute;
+            border: 2px solid #06B6D4;
+            border-radius: 4px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .bounding-box.active {
+            opacity: 1;
+        }
+
+        .how-it-works-line {
+            position: absolute;
+            left: 24px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e2e8f0;
+        }
+        .how-it-works-progress {
+            position: absolute;
+            left: 24px;
+            top: 0;
+            width: 2px;
+            background: #06B6D4;
+            height: 0%;
+            transition: height 0.1s linear;
+        }
+    </style>
+</head>
+<body class="overflow-x-hidden">
+<!-- Navbar: TopAppBar -->
+<header class="fixed top-0 w-full z-[100] backdrop-blur-md bg-white/70 border-b border-white/20 shadow-sm transition-all duration-300">
+<div class="flex justify-between items-center max-w-[1440px] mx-auto px-margin-mobile md:px-margin-desktop h-20">
+<div class="flex items-center gap-xs"><a href="/" class="flex items-center"><img src="/static/logo.png" alt="Dent AI Logo" class="w-auto object-contain h-12" style="height: 38px;"></a></div>
+<nav class="hidden md:flex gap-md items-center">
+<a class="font-body-md text-body-md text-secondary hover:text-cyan-600 transition-colors" href="/dashboard">Technology</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-cyan-600 transition-colors" href="/dashboard">Clinical Efficacy</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-cyan-600 transition-colors" href="/dashboard">Pricing</a>
+</nav>
+<div class="flex items-center gap-sm">
+
+<button onclick="window.location.href='/dashboard/'" class="active:scale-95 transition-transform duration-200 bg-cyan-500 hover:bg-cyan-600 text-white px-md py-xs rounded-lg font-label-md text-label-md shadow-lg shadow-cyan-500/20 btn-hover">Launch Dashboard</button>
+</div>
+</div>
+</header>
+<main>
+<!-- Hero Section -->
+
+<!-- Stats Bar Section -->
+<section class="relative pt-xl pb-lg md:pt-40 md:pb-xl hero-gradient section-reveal" style="translate: none; rotate: none; scale: none; opacity: 1; transform: translate(0px, 0px);">
+<div class="max-w-[1440px] mx-auto px-margin-mobile md:px-margin-desktop text-center">
+<div class="inline-flex items-center gap-xs px-sm py-1 rounded-full bg-cyan-500/10 text-cyan-600 font-label-md text-[12px] mb-base animate-pulse"><span class="material-symbols-outlined text-[14px]">auto_awesome</span> TEST BUILD V1</div>
+
+<h1 class="font-display-lg text-display-lg max-w-4xl mx-auto mb-md gs-reveal" style="translate: none; rotate: none; scale: none; opacity: 1; transform: translate(0px, 0px);">
+                    Instant Dental Disease Detection Powered by <span class="text-transparent bg-clip-text animate-shimmer">Intelligence</span>.
+                </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mx-auto mb-lg gs-reveal" style="translate: none; rotate: none; scale: none; opacity: 1; transform: translate(0px, 0px);">
+                    Upload X-rays or intraoral scans for sub-second pathology detection and clinical precision. Transform patient trust with data-driven diagnostics.
+                </p>
+<div class="flex flex-col md:flex-row justify-center gap-md gs-reveal" style="translate: none; rotate: none; scale: none; opacity: 1; transform: translate(0px, 0px);">
+<button onclick="window.location.href='/dashboard/'" class="bg-cyan-500 hover:bg-cyan-600 text-white px-xl py-md rounded-xl font-title-lg text-title-lg shadow-xl shadow-cyan-500/30 active:scale-95 transition-all btn-hover">
+                        Launch Diagnostic Dashboard
+                    </button>
+
+</div></div>
+</section>
+<!-- Live App Simulation -->
+<section class="bg-white border-y border-outline-variant/30 py-sm section-reveal" style="translate: none; rotate: none; scale: none; opacity: 1; transform: translate(0px, 0px);">
+<div class="max-w-[1440px] mx-auto px-margin-mobile md:px-margin-desktop">
+<div class="flex flex-wrap justify-center md:justify-between items-center gap-base md:gap-lg opacity-60">
+<div class="flex items-center gap-xs font-label-md text-label-md uppercase tracking-wider">
+<span class="text-cyan-600 font-bold">95%+</span> Detection Accuracy
+            </div>
+<span class="hidden md:block text-outline-variant">•</span>
+<div class="flex items-center gap-xs font-label-md text-label-md uppercase tracking-wider">
+<span class="text-cyan-600 font-bold">&lt;2s</span> Average Inference Time
+            </div>
+<span class="hidden md:block text-outline-variant">•</span>
+<div class="flex items-center gap-xs font-label-md text-label-md uppercase tracking-wider">
+<span class="text-cyan-600 font-bold">YOLOv8l</span> Powered
+            </div>
+<span class="hidden md:block text-outline-variant">•</span>
+<div class="flex items-center gap-xs font-label-md text-label-md uppercase tracking-wider">
+                Trained on Real Clinical X-rays
+            </div>
+</div>
+</div>
+</section>
+<!-- How It Works Section -->
+<section class="py-xl section-reveal overflow-hidden" style="translate: none; rotate: none; scale: none; opacity: 1; transform: translate(0px, 0px);">
+<div class="max-w-[1200px] mx-auto px-margin-mobile md:px-0">
+
+<div class="relative group rounded-[2rem] p-xs md:p-base bg-gradient-to-br from-slate-200 to-white shadow-2xl overflow-hidden gs-reveal parallax-target" data-speed="0.9" style="translate: none; rotate: none; scale: none; opacity: 1; transform: translate3d(0px, 19.3318px, 0px);">
+<!-- Tablet Frame Simulation -->
+<div class="relative rounded-[1.5rem] bg-black overflow-hidden aspect-video shadow-inner">
+<div class="scanning-line"></div>
+<img alt="Dent AI Dashboard Interface" class="w-full h-full object-cover opacity-95 group-hover:opacity-100 transition-opacity duration-700" src="https://lh3.googleusercontent.com/aida/AP1WRLsugBpeOP_xZ80qcVtJ5xAmwhtLOLaVpFX0Tv6_fhDL1HrUFIOAnQA3kjLx6IauBEMNQOBAz53XKKgPpJceVgPLhDLWqEQyFOmwRs17lclykmozYF-l5ZqIBLMbUlYHsGtB8ljMTGWF1HR_A4a-cI5r_cBJbUlVbV214u6ZRVwYtnuJ-zGIqaGfgytPUvImhi_DvoEZ4bJlC5J5qtXe5LF5_betyHwNURi2PnhC4jdpsLitT7hIaR-Ea7QX">
+<!-- AI Overlays Simulation -->
+<div class="absolute inset-0 pointer-events-none">
+<div class="bounding-box active" style="top: 45%; left: 34%; width: 6%; height: 10%;"></div>
+<div class="bounding-box active" style="top: 48%; left: 55%; width: 6%; height: 12%; border-color: #10B981;"></div>
+</div>
+<!-- HUD Overlays -->
+<div class="absolute inset-0 pointer-events-none border-[1px] border-white/5 rounded-[1.5rem]"></div>
+<div class="absolute top-md left-md flex gap-xs">
+<div class="w-2 h-2 rounded-full bg-red-500"></div>
+<div class="w-2 h-2 rounded-full bg-yellow-500"></div>
+<div class="w-2 h-2 rounded-full bg-green-500"></div>
+</div>
+</div>
+<!-- Glow effect -->
+<div class="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-emerald-500 rounded-[2rem] opacity-0 group-hover:opacity-10 transition-opacity blur-2xl -z-10"></div>
+</div></div>
+</section>
+<!-- Features Grid -->
+<section class="py-xl bg-surface section-reveal" style="translate: none; rotate: none; scale: none; opacity: 1; transform: translate(0px, 0px);">
+<div class="max-w-[1440px] mx-auto px-margin-mobile md:px-margin-desktop">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-xl items-start">
+
+<div class="gs-reveal" style="translate: none; rotate: none; scale: none; opacity: 1; transform: translate(0px, 0px);">
+<h2 class="font-headline-lg text-headline-lg mb-md">Precision Diagnosis in Seconds</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-xl">Our neural network analyzes every pixel to ensure no pathology goes unnoticed, providing you with a high-fidelity second opinion.</p>
+<div class="relative pl-12 space-y-lg">
+<div class="how-it-works-line"></div>
+<div class="how-it-works-progress" id="how-it-works-progress" style="height: 100%;"></div>
+<!-- Step 1 -->
+
+<!-- Step 2 -->
+<div class="relative how-step gs-reveal" style="translate: none; rotate: none; scale: none; opacity: 1; transform: translate(0px, 0px);">
+<div class="absolute -left-12 w-6 h-6 rounded-full bg-cyan-500 flex items-center justify-center text-white text-[10px] font-bold z-10">1</div>
+<h4 class="font-title-lg text-title-lg mb-xs">01. Secure Upload</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">Drag and drop panoramic or periapical X-rays directly into the cloud-secure portal.</p>
+</div>
+<!-- Step 3 -->
+<div class="relative how-step gs-reveal" style="translate: none; rotate: none; scale: none; opacity: 1; transform: translate(0px, 0px);">
+<div class="absolute -left-12 w-6 h-6 rounded-full bg-slate-300 flex items-center justify-center text-white text-[10px] font-bold z-10 step-dot bg-cyan-500">2</div>
+<h4 class="font-title-lg text-title-lg mb-xs">02. Instant Detection</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">Our YOLOv8l engine identifies caries, lesions, and bone loss with heatmap overlays.</p>
+</div>
+<div class="relative how-step gs-reveal" style="translate: none; rotate: none; scale: none; opacity: 1; transform: translate(0px, 0px);">
+<div class="absolute -left-12 w-6 h-6 rounded-full bg-slate-300 flex items-center justify-center text-white text-[10px] font-bold z-10 step-dot bg-cyan-500">3</div>
+<h4 class="font-title-lg text-title-lg mb-xs">03. Clinical Verification</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">Verify detections and export comprehensive findings to your PMS system with one click.</p>
+</div></div>
+</div>
+<div class="hidden md:flex justify-center items-center h-full gs-reveal" style="translate: none; rotate: none; scale: none; opacity: 1; transform: translate(0px, 0px);">
+<div class="w-full aspect-square bg-gradient-to-br from-cyan-50 to-emerald-50 rounded-3xl flex items-center justify-center border border-outline-variant/30 shadow-inner">
+<span class="material-symbols-outlined text-cyan-600/20 text-[200px]">biotech</span>
+</div>
+</div></div>
+</div>
+</section>
+<!-- CTA Section -->
+<section class="py-xl bg-surface-container-lowest section-reveal" style="translate: none; rotate: none; scale: none; opacity: 1; transform: translate(0px, 0px);">
+<div class="max-w-[1440px] mx-auto px-margin-mobile md:px-margin-desktop">
+
+<div class="mb-xl gs-reveal" style="translate: none; rotate: none; scale: none; opacity: 1; transform: translate(0px, 0px);">
+<h2 class="font-headline-lg text-headline-lg mb-base">Precision Features</h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xl">Advanced computational tools designed to integrate seamlessly into existing clinical workflows.</p>
+</div><div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<!-- Card 1 -->
+
+<!-- Card 2 -->
+<div class="p-lg bg-white rounded-3xl shadow-sm border border-outline-variant/30 feature-card-hover gs-feature-card" style="translate: none; rotate: none; scale: none; opacity: 0; transform: translate(0px, 40px);">
+<div class="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-600 mb-md">
+<span class="material-symbols-outlined">segment</span>
+</div>
+<h3 class="font-title-lg text-title-lg mb-sm">01. Automated Segmentation</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Our AI automatically isolates every tooth, restoration, and anatomical landmark in seconds, providing a clean map for diagnosis.</p>
+</div>
+<!-- Card 3 -->
+<div class="p-lg bg-white rounded-3xl shadow-sm border border-outline-variant/30 feature-card-hover gs-feature-card" style="translate: none; rotate: none; scale: none; opacity: 0; transform: translate(0px, 40px);">
+<div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 mb-md">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+<h3 class="font-title-lg text-title-lg mb-sm">02. High-Confidence Detection Filters</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Identify caries, periapical lesions, and bone loss with &gt;98% confidence. Use multi-spectral filters to reveal hidden pathologies.</p>
+</div>
+<div class="p-lg bg-white rounded-3xl shadow-sm border border-outline-variant/30 feature-card-hover gs-feature-card" style="translate: none; rotate: none; scale: none; opacity: 0; transform: translate(0px, 40px);">
+<div class="w-12 h-12 rounded-xl bg-primary-container/10 flex items-center justify-center text-primary-container mb-md">
+<span class="material-symbols-outlined">sync_alt</span>
+</div>
+<h3 class="font-title-lg text-title-lg mb-sm">03. Seamless Dashboard Handoff</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Export diagnostic reports directly to your Practice Management Software (PMS) with one click, streamlining patient consultation.</p>
+</div></div>
+</div>
+</section>
+<section class="py-xl section-reveal" style="translate: none; rotate: none; scale: none; opacity: 1; transform: translate(0px, 0px);">
+<div class="max-w-[1440px] mx-auto px-margin-mobile md:px-margin-desktop">
+
+<div class="bg-primary text-on-primary rounded-[3rem] p-xl text-center relative overflow-hidden gs-reveal" style="translate: none; rotate: none; scale: none; opacity: 1; transform: translate(0px, 0px);">
+<div class="relative z-10">
+<h2 class="font-display-lg text-display-lg mb-md">Ready for the future of dentistry?</h2>
+<p class="font-body-lg text-body-lg text-primary-fixed-dim max-w-xl mx-auto mb-lg">Join Dent AI to improve clinical outcomes.</p>
+<button onclick="window.location.href='/dashboard/'" class="bg-white text-primary px-xl py-md rounded-xl font-title-lg text-title-lg hover:scale-105 active:scale-95 transition-all btn-hover">Launch Diagnostic Dashboard</button>
+</div>
+<!-- Decorative elements -->
+<div class="absolute top-0 right-0 w-64 h-64 bg-cyan-500/20 blur-3xl rounded-full translate-x-1/2 -translate-y-1/2"></div>
+<div class="absolute bottom-0 left-0 w-96 h-96 bg-emerald-500/10 blur-3xl rounded-full -translate-x-1/2 translate-y-1/2"></div>
+</div></div>
+</section></main>
+<!-- Footer -->
+<footer class="w-full py-lg bg-surface-container-lowest dark:bg-surface-dim mt-xl border-t border-outline-variant/10">
+<div class="flex flex-col md:flex-row justify-between items-center max-w-[1440px] mx-auto px-margin-mobile md:px-margin-desktop gap-md">
+<div class="flex flex-col gap-xs items-center md:items-start">
+<div class="flex items-center gap-xs opacity-80"><img src="/static/logo.png" alt="Dent AI Logo" class="w-auto object-contain h-12" style="height: 38px;"></div>
+<p class="font-caption text-caption text-on-surface-variant">© 2024 Dent AI. Precision Clinical Intelligence.</p>
+</div>
+<div class="flex gap-lg flex-wrap justify-center">
+<a class="font-caption text-caption text-on-surface-variant hover:text-cyan-600 transition-colors" href="#">Privacy Policy</a>
+<a class="font-caption text-caption text-on-surface-variant hover:text-cyan-600 transition-colors" href="#">Terms of Service</a>
+<a class="font-caption text-caption text-on-surface-variant hover:text-cyan-600 transition-colors" href="#">Contact Support</a>
+<a class="font-caption text-caption text-on-surface-variant hover:text-cyan-600 transition-colors" href="#">Documentation</a>
+</div>
+</div>
+</footer>
+<script>
+    // GSAP Animations
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Fade and slide up for all sections and reveal elements
+    const revealElements = document.querySelectorAll('.section-reveal, .gs-reveal');
+    revealElements.forEach((el) => {
+        gsap.from(el, {
+            scrollTrigger: {
+                trigger: el,
+                start: "top 85%",
+                toggleActions: "play none none none"
+            },
+            y: 50,
+            opacity: 0,
+            duration: 1,
+            ease: "power3.out"
+        });
+    });
+
+    // Stagger reveal of feature cards
+    gsap.from(".gs-feature-card", {
+        scrollTrigger: {
+            trigger: ".gs-feature-card",
+            start: "top 80%",
+        },
+        y: 40,
+        opacity: 0,
+        duration: 0.8,
+        stagger: 0.2,
+        ease: "power2.out"
+    });
+
+    // Parallax effect for X-ray frame
+    gsap.to(".parallax-target", {
+        scrollTrigger: {
+            trigger: ".parallax-target",
+            start: "top bottom",
+            end: "bottom top",
+            scrub: true
+        },
+        y: (i, target) => {
+            const speed = target.dataset.speed || 0.9;
+            return (1 - speed) * 100;
+        },
+        ease: "none"
+    });
+
+    // How It Works Progress Line
+    gsap.to("#how-it-works-progress", {
+        height: "100%",
+        scrollTrigger: {
+            trigger: ".how-it-works-line",
+            start: "top center",
+            end: "bottom center",
+            scrub: true,
+            onUpdate: (self) => {
+                const progress = self.progress;
+                const dots = document.querySelectorAll('.step-dot');
+                if (progress > 0.4) dots[0].classList.add('bg-cyan-500');
+                else dots[0].classList.remove('bg-cyan-500');
+                if (progress > 0.85) dots[1].classList.add('bg-cyan-500');
+                else dots[1].classList.remove('bg-cyan-500');
+            }
+        }
+    });
+
+    // Navbar blur on scroll logic
+    window.addEventListener('scroll', () => {
+        const header = document.querySelector('header');
+        if (window.scrollY > 20) {
+            header.classList.add('py-2', 'bg-white/90');
+            header.classList.remove('py-4', 'bg-white/70');
+        } else {
+            header.classList.remove('py-2', 'bg-white/90');
+            header.classList.add('py-4', 'bg-white/70');
+        }
+    });
+
+    // Simulate AI Processing (Bounding Box Reveal)
+    setInterval(() => {
+        const boxes = document.querySelectorAll('.bounding-box');
+        boxes.forEach((box, index) => {
+            setTimeout(() => {
+                box.classList.toggle('active');
+            }, index * 500);
+        });
+    }, 6000);
+</script>
+
+
+
+
+
+
+
+
+
+
+</body></html>

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DentAI — Upload Scan</title>
+  <meta name="description" content="Upload a dental X-ray for AI-powered disease detection" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
+  <style>
+    :root {
+      --teal:#0d7377; --teal-dark:#0a5a5e; --teal-light:#e6f4f5; --teal-mid:#b2dfe0;
+      --coral:#ff6b6b; --coral-light:#fff0f0;
+      --bg:#f8fafb; --surface:#ffffff; --border:#e8ecef;
+      --text-primary:#1a2332; --text-secondary:#5a6a7a; --text-muted:#9aabb8;
+      --red:#e53e3e; --orange:#dd6b20; --green:#276749;
+      --shadow-sm:0 1px 4px rgba(13,115,119,0.06); --shadow-md:0 4px 20px rgba(13,115,119,0.10);
+      --radius-sm:8px; --radius-md:14px; --sidebar-w:260px; --transition:0.22s cubic-bezier(0.4,0,0.2,1);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-primary);display:flex;min-height:100vh;-webkit-font-smoothing:antialiased;}
+    /* Sidebar */
+    .sidebar{width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;height:100vh;z-index:100;box-shadow:var(--shadow-sm);}
+    .sidebar-logo{padding:28px 24px 22px;border-bottom:1px solid var(--border);}
+    .logo-mark{display:flex;align-items:center;gap:10px;}
+    .logo-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--teal),var(--teal-dark));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 2px 8px rgba(13,115,119,0.25);}
+    .logo-text h1{font-family:'Lora',serif;font-size:19px;font-weight:700;color:var(--teal-dark);letter-spacing:-0.3px;}
+    .logo-text p{font-size:10.5px;color:var(--text-muted);margin-top:1px;font-weight:500;letter-spacing:0.5px;text-transform:uppercase;}
+    .sidebar-nav{flex:1;padding:20px 12px;overflow-y:auto;}
+    .nav-section-label{font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;padding:0 12px;margin:16px 0 6px;}
+    .nav-item{display:flex;align-items:center;gap:11px;padding:11px 14px;border-radius:var(--radius-sm);transition:all var(--transition);font-size:14px;font-weight:500;text-decoration:none;color:var(--text-secondary);margin-bottom:2px;position:relative;}
+    .nav-item:hover{background:var(--teal-light);color:var(--teal);}
+    .nav-item.active{background:var(--teal-light);color:var(--teal);font-weight:600;}
+    .nav-item.active::before{content:'';position:absolute;left:0;top:20%;bottom:20%;width:3px;background:var(--teal);border-radius:0 3px 3px 0;}
+    .nav-item .material-icons-round{font-size:19px;}
+    .sidebar-footer{padding:16px 20px;border-top:1px solid var(--border);}
+    .doctor-card{display:flex;align-items:center;gap:11px;padding:10px 12px;background:var(--bg);border-radius:var(--radius-sm);}
+    .doctor-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--teal-dark));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:white;flex-shrink:0;}
+    .doctor-name{font-size:13px;font-weight:600;color:var(--text-primary);}
+    .doctor-role{font-size:11px;color:var(--text-muted);margin-top:1px;}
+    /* Main */
+    .main{margin-left:var(--sidebar-w);flex:1;padding:36px 40px;max-width:960px;}
+    .page-header{margin-bottom:32px;}
+    .page-header h2{font-family:'Lora',serif;font-size:28px;font-weight:700;color:var(--text-primary);letter-spacing:-0.5px;}
+    .page-header p{color:var(--text-secondary);margin-top:5px;font-size:14px;}
+    /* Upload Form */
+    .upload-grid{display:grid;grid-template-columns:1fr 380px;gap:24px;}
+    .card{background:var(--surface);border-radius:var(--radius-md);border:1px solid var(--border);box-shadow:var(--shadow-sm);padding:28px 24px;animation:fadeUp 0.4s ease both;}
+    .card:nth-child(2){animation-delay:0.1s;}
+    .card-title{display:flex;align-items:center;gap:8px;font-family:'Lora',serif;font-size:17px;font-weight:600;color:var(--text-primary);margin-bottom:22px;}
+    .card-title .material-icons-round{color:var(--teal);font-size:20px;}
+    /* Drop Zone */
+    .drop-zone{border:2px dashed var(--teal-mid);border-radius:var(--radius-md);padding:48px 24px;text-align:center;cursor:pointer;transition:all var(--transition);background:var(--bg);position:relative;margin-bottom:22px;}
+    .drop-zone:hover,.drop-zone.drag-over{border-color:var(--teal);background:var(--teal-light);}
+    .drop-icon{width:56px;height:56px;background:var(--teal-light);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;}
+    .drop-icon .material-icons-round{font-size:28px;color:var(--teal);}
+    .drop-title{font-size:15px;font-weight:600;color:var(--text-primary);margin-bottom:6px;}
+    .drop-sub{font-size:13px;color:var(--text-muted);}
+    .drop-sub span{color:var(--teal);font-weight:600;cursor:pointer;}
+    #file-input{position:absolute;inset:0;opacity:0;cursor:pointer;}
+    .preview-wrap{display:none;text-align:center;margin-bottom:16px;}
+    .preview-wrap img{max-height:180px;border-radius:var(--radius-sm);border:1px solid var(--border);}
+    .preview-name{font-size:12px;color:var(--text-muted);margin-top:8px;}
+    /* Form fields */
+    .form-section{margin-bottom:20px;}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+    .form-group{display:flex;flex-direction:column;gap:7px;}
+    .form-group label{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.7px;}
+    .form-group input,.form-group select,.form-group textarea{
+      padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);
+      font-size:13.5px;background:var(--bg);font-family:'Inter',sans-serif;
+      outline:none;color:var(--text-primary);transition:border-color var(--transition),box-shadow var(--transition);}
+    .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(13,115,119,0.12);background:var(--surface);}
+    .form-group select{cursor:pointer;}
+    .divider{display:flex;align-items:center;gap:12px;margin:16px 0;color:var(--text-muted);font-size:12px;}
+    .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+    /* Scan type selector */
+    .scan-type-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;}
+    .scan-type-btn{border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:14px;text-align:center;cursor:pointer;transition:all var(--transition);background:var(--bg);}
+    .scan-type-btn:hover{border-color:var(--teal);background:var(--teal-light);}
+    .scan-type-btn.selected{border-color:var(--teal);background:var(--teal-light);color:var(--teal);}
+    .scan-type-btn .material-icons-round{font-size:24px;color:var(--text-muted);display:block;margin-bottom:4px;}
+    .scan-type-btn.selected .material-icons-round{color:var(--teal);}
+    .scan-type-btn .scan-label{font-size:13px;font-weight:600;}
+    .scan-type-btn .scan-desc{font-size:11px;color:var(--text-muted);margin-top:2px;}
+    /* Patient section */
+    .patient-toggle{display:flex;gap:8px;margin-bottom:18px;}
+    .toggle-btn{flex:1;padding:9px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;background:var(--bg);color:var(--text-secondary);transition:all var(--transition);}
+    .toggle-btn.active{border-color:var(--teal);background:var(--teal-light);color:var(--teal);}
+    /* Submit button */
+    .btn-submit{background:linear-gradient(135deg,var(--teal) 0%,var(--teal-dark) 100%);color:#fff;border:none;border-radius:var(--radius-sm);padding:14px 20px;font-size:14px;font-weight:600;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity var(--transition),transform var(--transition),box-shadow var(--transition);letter-spacing:0.2px;}
+    .btn-submit:hover:not(:disabled){opacity:0.92;transform:translateY(-1px);box-shadow:0 4px 16px rgba(13,115,119,0.3);}
+    .btn-submit:disabled{opacity:0.5;cursor:not-allowed;}
+    /* Status messages */
+    .status-msg{padding:12px 16px;border-radius:var(--radius-sm);font-size:13.5px;margin-top:12px;display:none;align-items:center;gap:8px;}
+    .status-info{background:var(--teal-light);color:var(--teal-dark);border-left:3px solid var(--teal);}
+    .status-success{background:#f0faf4;color:var(--green);border-left:3px solid var(--green);}
+    .status-error{background:var(--coral-light);color:var(--red);border-left:3px solid var(--red);}
+    /* Info card */
+    .info-steps{display:flex;flex-direction:column;gap:16px;}
+    .info-step{display:flex;gap:14px;align-items:flex-start;}
+    .step-num{width:30px;height:30px;border-radius:50%;background:var(--teal);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .step-text h4{font-size:13.5px;font-weight:600;color:var(--text-primary);margin-bottom:2px;}
+    .step-text p{font-size:12px;color:var(--text-muted);}
+    .spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">
+        <img src="/static/logo.png" alt="DentAI Logo" style="height: 38px; width: auto; display: block; object-fit: contain;">
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <a href="/dashboard/" class="nav-item"><span class="material-icons-round">dashboard</span> Dashboard</a>
+      <a href="/upload/" class="nav-item active"><span class="material-icons-round">add_circle_outline</span> New Scan</a>
+      <div class="nav-section-label">Clinical</div>
+      <a href="/results/" class="nav-item"><span class="material-icons-round">biotech</span> Results</a>
+      <a href="/history/" class="nav-item"><span class="material-icons-round">manage_history</span> Patient History</a>
+      <a href="/reports/" class="nav-item"><span class="material-icons-round">description</span> Reports</a>
+    </nav>
+
+  </aside>
+
+  <main class="main">
+    <div class="page-header">
+      <h2>New Scan</h2>
+      <p>Upload a dental X-ray image for AI-powered disease detection</p>
+    </div>
+
+    <div class="upload-grid">
+      <!-- Upload Form -->
+      <div class="card">
+        <div class="card-title"><span class="material-icons-round">upload_file</span> Upload X-Ray</div>
+
+        <!-- Scan Type -->
+        <div class="form-group" style="margin-bottom:18px">
+          <label>Scan Type</label>
+          <div class="scan-type-row">
+            <div class="scan-type-btn selected" id="btn-opg" onclick="selectScanType('OPG')">
+              <span class="material-icons-round">panorama</span>
+              <div class="scan-label">OPG</div>
+              <div class="scan-desc">Full mouth panoramic</div>
+            </div>
+            <div class="scan-type-btn" id="btn-iopa" onclick="selectScanType('IOPA')">
+              <span class="material-icons-round">crop_square</span>
+              <div class="scan-label">IOPA</div>
+              <div class="scan-desc">Intraoral periapical</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Drop Zone -->
+        <div class="drop-zone" id="drop-zone">
+          <input type="file" id="file-input" accept=".jpg,.jpeg,.png,.bmp" />
+          <div id="drop-content">
+            <div class="drop-icon"><span class="material-icons-round">cloud_upload</span></div>
+            <div class="drop-title">Drop your X-ray here</div>
+            <div class="drop-sub">or <span>browse files</span> — JPG, PNG, BMP up to 20MB</div>
+          </div>
+          <div class="preview-wrap" id="preview-wrap">
+            <img id="preview-img" src="" alt="Preview" />
+            <div class="preview-name" id="preview-name"></div>
+          </div>
+        </div>
+
+        <!-- Patient -->
+        <div class="form-group" style="margin-bottom:14px">
+          <label>Patient</label>
+          <div class="patient-toggle">
+            <button class="toggle-btn active" id="tbtn-existing" onclick="togglePatient('existing')">Existing Patient</button>
+            <button class="toggle-btn" id="tbtn-new" onclick="togglePatient('new')">New Patient</button>
+          </div>
+        </div>
+
+        <!-- Existing Patient -->
+        <div id="section-existing">
+          <div class="form-group" style="margin-bottom:18px">
+            <label>Patient ID</label>
+            <input type="text" id="patient-id-code" placeholder="e.g. PT-001" />
+          </div>
+        </div>
+
+        <!-- New Patient -->
+        <div id="section-new" style="display:none">
+          <div class="form-row">
+            <div class="form-group"><label>First Name</label><input type="text" id="first-name" placeholder="First name" /></div>
+            <div class="form-group"><label>Last Name</label><input type="text" id="last-name" placeholder="Last name" /></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Age</label><input type="number" id="age" placeholder="Age" min="1" max="120" /></div>
+            <div class="form-group">
+              <label>Gender</label>
+              <select id="gender">
+                <option value="M">Male</option>
+                <option value="F">Female</option>
+                <option value="O">Other</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Doctor Name -->
+        <div class="form-group" style="margin-bottom:18px">
+          <label>Doctor Name (optional)</label>
+          <input type="text" id="doctor-name" placeholder="e.g. Dr. Jane Smith" />
+        </div>
+
+        <!-- Doctor Notes -->
+        <div class="form-group" style="margin-bottom:22px">
+          <label>Doctor Notes (optional)</label>
+          <textarea id="doctor-notes" rows="3" placeholder="Clinical observations, symptoms, patient history..."></textarea>
+        </div>
+
+        <button class="btn-submit" id="submit-btn" onclick="submitScan()">
+          <span class="material-icons-round">send</span> Run AI Detection
+        </button>
+        <div class="status-msg status-info" id="msg-info"><span class="material-icons-round" style="font-size:16px">hourglass_top</span> <span id="msg-info-text">Processing…</span></div>
+        <div class="status-msg status-success" id="msg-success"><span class="material-icons-round" style="font-size:16px">check_circle</span> <span id="msg-success-text"></span></div>
+        <div class="status-msg status-error" id="msg-error"><span class="material-icons-round" style="font-size:16px">error</span> <span id="msg-error-text"></span></div>
+      </div>
+
+      <!-- Info Panel -->
+      <div class="card">
+        <div class="card-title"><span class="material-icons-round">info</span> How It Works</div>
+        <div class="info-steps">
+          <div class="info-step">
+            <div class="step-num">1</div>
+            <div class="step-text">
+              <h4>Upload X-Ray</h4>
+              <p>Select an OPG or IOPA dental radiograph in JPG, PNG, or BMP format.</p>
+            </div>
+          </div>
+          <div class="info-step">
+            <div class="step-num">2</div>
+            <div class="step-text">
+              <h4>AI Analysis</h4>
+              <p>Our YOLOv8 model scans the image at 4K resolution for 11 dental conditions.</p>
+            </div>
+          </div>
+          <div class="info-step">
+            <div class="step-num">3</div>
+            <div class="step-text">
+              <h4>Review Results</h4>
+              <p>Annotated X-ray with disease landmarks, FDI tooth numbers, and severity scores.</p>
+            </div>
+          </div>
+          <div class="info-step">
+            <div class="step-num">4</div>
+            <div class="step-text">
+              <h4>Download Report</h4>
+              <p>Generate a clinical PDF report for the patient record.</p>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:28px;padding:16px;background:var(--teal-light);border-radius:var(--radius-sm);border:1px solid var(--teal-mid)">
+          <div style="font-size:12px;font-weight:700;color:var(--teal-dark);margin-bottom:6px;">🔬 Detectable Conditions</div>
+          <div style="font-size:12px;color:var(--text-secondary);line-height:1.8">
+            Occlusal Caries · Proximal Caries · Periapical Abscess · Periapical Cyst ·
+            Granuloma · Apical Periodontitis · Horizontal Bone Loss · Vertical Bone Loss ·
+            Root Canal Required · Milk Tooth · Healthy
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const API = '/api';
+    let selectedScanType = 'OPG';
+    let selectedFile = null;
+
+    // Scan type selection
+    function selectScanType(type) {
+      selectedScanType = type;
+      document.getElementById('btn-opg').classList.toggle('selected', type === 'OPG');
+      document.getElementById('btn-iopa').classList.toggle('selected', type === 'IOPA');
+    }
+
+    // Patient toggle
+    function togglePatient(mode) {
+      document.getElementById('section-existing').style.display = mode === 'existing' ? 'block' : 'none';
+      document.getElementById('section-new').style.display = mode === 'new' ? 'block' : 'none';
+      document.getElementById('tbtn-existing').classList.toggle('active', mode === 'existing');
+      document.getElementById('tbtn-new').classList.toggle('active', mode === 'new');
+    }
+
+    // File handling
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+
+    fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+    dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag-over'); handleFile(e.dataTransfer.files[0]); });
+
+    function handleFile(file) {
+      if (!file) return;
+      selectedFile = file;
+      const reader = new FileReader();
+      reader.onload = e => {
+        document.getElementById('preview-img').src = e.target.result;
+        document.getElementById('preview-name').textContent = file.name;
+        document.getElementById('drop-content').style.display = 'none';
+        document.getElementById('preview-wrap').style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function showMsg(type, text) {
+      ['info','success','error'].forEach(t => {
+        const el = document.getElementById(`msg-${t}`);
+        el.style.display = 'none';
+      });
+      const el = document.getElementById(`msg-${type}`);
+      document.getElementById(`msg-${type}-text`).textContent = text;
+      el.style.display = 'flex';
+    }
+
+    async function submitScan() {
+      if (!selectedFile) { showMsg('error', 'Please select an X-ray image first.'); return; }
+
+      const isExisting = document.getElementById('tbtn-existing').classList.contains('active');
+      const btn = document.getElementById('submit-btn');
+
+      const formData = new FormData();
+      formData.append('image', selectedFile);
+      formData.append('scan_type', selectedScanType);
+
+      if (isExisting) {
+        const pid = document.getElementById('patient-id-code').value.trim();
+        if (!pid) { showMsg('error', 'Please enter a Patient ID.'); return; }
+        formData.append('patient_id_code', pid);
+      } else {
+        const fn = document.getElementById('first-name').value.trim();
+        const ln = document.getElementById('last-name').value.trim();
+        const age = document.getElementById('age').value;
+        if (!fn || !ln || !age) { showMsg('error', 'Please fill in all patient details.'); return; }
+        formData.append('first_name', fn);
+        formData.append('last_name', ln);
+        formData.append('age', age);
+        formData.append('gender', document.getElementById('gender').value);
+      }
+
+      const docName = document.getElementById('doctor-name').value.trim();
+      if (docName) formData.append('doctor_name', docName);
+
+      const notes = document.getElementById('doctor-notes').value;
+      if (notes) formData.append('doctor_notes', notes);
+
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner"></div> Running AI Detection...';
+      showMsg('info', 'Uploading X-ray and running AI detection... this may take 30–60 seconds.');
+
+      try {
+        const res  = await fetch(`${API}/scans/upload/`, { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.error || JSON.stringify(data));
+
+        const scanId = data.id;
+        showMsg('info', 'Detection running in background. Waiting for results...');
+        pollStatus(scanId);
+
+      } catch (err) {
+        showMsg('error', err.message);
+        btn.disabled = false;
+        btn.innerHTML = '<span class="material-icons-round">send</span> Run AI Detection';
+      }
+    }
+
+    async function pollStatus(scanId) {
+      const btn = document.getElementById('submit-btn');
+      for (let i = 0; i < 40; i++) {
+        await new Promise(r => setTimeout(r, 3000));
+        try {
+          const res  = await fetch(`${API}/scans/${scanId}/status/`);
+          const data = await res.json();
+          if (data.status === 'completed') {
+            showMsg('success', 'Detection complete! Redirecting to results...');
+            setTimeout(() => window.location.href = `/results/?scan=${scanId}`, 1500);
+            return;
+          } else if (data.status === 'failed') {
+            showMsg('error', 'Detection failed. Please try uploading again.');
+            btn.disabled = false;
+            btn.innerHTML = '<span class="material-icons-round">send</span> Run AI Detection';
+            return;
+          }
+        } catch(e) {}
+      }
+      showMsg('error', 'Detection is taking too long. Please check the results page manually.');
+      btn.disabled = false;
+      btn.innerHTML = '<span class="material-icons-round">send</span> Run AI Detection';
+    }
+  </script>
+</body>
+</html>

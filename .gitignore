@@ -1,0 +1,47 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*$py.class
+
+# Django
+db.sqlite3
+media/
+staticfiles/
+
+# Virtual Environments
+venv/
+.venv/
+env/
+.env
+
+# Package managers
+node_modules/
+dist/
+build/
+
+
+# Large model files and datasets
+*.pt
+models/
+colab_dataset.zip
+*.zip
+*.bmp
+*.jpg
+*.png
+
+# Training datasets and runs
+training/augmented_dataset/
+training/converted/
+training/merged_dataset/
+training/raw_datasets/
+training/runs/
+
+
+# VS Code / IDEs
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp

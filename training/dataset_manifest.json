@@ -1,0 +1,93 @@
+{
+  "dentex_hf": "C:\\Users\\Acer\\Downloads\\DentAI\\training\\raw_datasets\\dentex_hf",
+  "dentex_hf__fmt": "coco_json",
+  "dentex_hf__diseases": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "dentex_kaggle": "C:\\Users\\Acer\\Downloads\\DentAI\\training\\raw_datasets\\dentex_kaggle",
+  "dentex_kaggle__fmt": "coco_json",
+  "dentex_kaggle__diseases": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "dental_disease_panoramic": "C:\\Users\\Acer\\Downloads\\DentAI\\training\\raw_datasets\\dental_disease_panoramic",
+  "dental_disease_panoramic__fmt": "yolov8",
+  "dental_disease_panoramic__diseases": [
+    0,
+    1,
+    2,
+    6,
+    7
+  ],
+  "periapical_yolo": "C:\\Users\\Acer\\Downloads\\DentAI\\training\\raw_datasets\\periapical_yolo",
+  "periapical_yolo__fmt": "yolov8",
+  "periapical_yolo__diseases": [
+    2,
+    3,
+    4,
+    5
+  ],
+  "dental_disease_detection": "C:\\Users\\Acer\\Downloads\\DentAI\\training\\raw_datasets\\dental_disease_detection",
+  "dental_disease_detection__fmt": "voc_xml",
+  "dental_disease_detection__diseases": [
+    0,
+    1,
+    2,
+    5,
+    6
+  ],
+  "oral_diseases": "C:\\Users\\Acer\\Downloads\\DentAI\\training\\raw_datasets\\oral_diseases",
+  "oral_diseases__fmt": "mixed",
+  "oral_diseases__diseases": [
+    0,
+    1,
+    2,
+    5
+  ],
+  "panoramic_dental": "C:\\Users\\Acer\\Downloads\\DentAI\\training\\raw_datasets\\panoramic_dental",
+  "panoramic_dental__fmt": "mixed",
+  "panoramic_dental__diseases": [
+    10,
+    9,
+    0,
+    6
+  ],
+  "dental_opg_xray": "C:\\Users\\Acer\\Downloads\\DentAI\\training\\raw_datasets\\dental_opg_xray",
+  "dental_opg_xray__fmt": "jpg_only",
+  "dental_opg_xray__diseases": [
+    10
+  ],
+  "childrens_panoramic": "C:\\Users\\Acer\\Downloads\\DentAI\\training\\raw_datasets\\childrens_panoramic",
+  "childrens_panoramic__fmt": "mixed",
+  "childrens_panoramic__diseases": [
+    9,
+    10
+  ],
+  "teeth_segmentation": "C:\\Users\\Acer\\Downloads\\DentAI\\training\\raw_datasets\\teeth_segmentation",
+  "teeth_segmentation__fmt": "coco_json",
+  "teeth_segmentation__diseases": [
+    10,
+    9
+  ],
+  "arulfadholi_periapical": "C:\\Users\\Acer\\Downloads\\DentAI\\training\\raw_datasets\\arulfadholi_periapical",
+  "arulfadholi_periapical__fmt": "mixed",
+  "arulfadholi_periapical__diseases": [
+    2,
+    3,
+    4,
+    5
+  ]
+}
