@@ -64,12 +64,20 @@ TEMPLATES = [
 WSGI_APPLICATION = 'dentalai.wsgi.application'
 
 # ─── Database: SQLite3 ────────────────────────────────────────────────────────
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if os.environ.get('VERCEL') == '1':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': '/tmp/db.sqlite3',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # ─── Password Validators ─────────────────────────────────────────────────────
 AUTH_PASSWORD_VALIDATORS = [
@@ -92,7 +100,10 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+if os.environ.get('VERCEL') == '1':
+    MEDIA_ROOT = '/tmp/media'
+else:
+    MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
