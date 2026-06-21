@@ -109,20 +109,24 @@ class ScanUploadView(APIView):
             status        = 'processing',
         )
 
-        # ── Run detection asynchronously ───────────────────────────────────
-        thread = threading.Thread(
-            target=self._run_detection_async,
-            args=(scan.id,),
-            daemon=True,
-        )
-        thread.start()
+        # ── Run detection asynchronously (or synchronously on Vercel) ──────
+        if os.environ.get('VERCEL') == '1':
+            self._run_detection_async(scan.id)
+            scan.refresh_from_db()
+        else:
+            thread = threading.Thread(
+                target=self._run_detection_async,
+                args=(scan.id,),
+                daemon=True,
+            )
+            thread.start()
 
         return Response(
             {
                 'scan_id':  str(scan.scan_id),
                 'id':       scan.id,
                 'status':   scan.status,
-                'message':  'Scan uploaded. Detection running...',
+                'message':  'Scan uploaded. Detection completed.' if os.environ.get('VERCEL') == '1' else 'Scan uploaded. Detection running...',
                 'patient':  PatientSerializer(patient).data,
             },
             status=status.HTTP_202_ACCEPTED,

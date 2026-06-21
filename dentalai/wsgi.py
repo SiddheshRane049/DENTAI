@@ -21,5 +21,10 @@ try:
 except Exception as e:
     print(f"Error running auto-migrations: {e}")
 
+try:
+    call_command('collectstatic', interactive=False, clear=True)
+except Exception as e:
+    print(f"Error running collectstatic: {e}")
+
 application = get_wsgi_application()
 app = application
