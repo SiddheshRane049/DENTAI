@@ -1,10 +1,152 @@
-<!DOCTYPE html>
-<html class="dark" lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>DentAI Diagnostic | Engineering Project</title>
-  
+<!DOCTYPE html><html class="dark" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>DentAI Diagnostic | Engineering Project</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "surface-container": "#1a1f2f",
+                "surface-container-highest": "#2f3445",
+                "surface-bright": "#343949",
+                "on-secondary-fixed": "#002113",
+                "on-primary-container": "#00424f",
+                "outline-variant": "#3d494c",
+                "surface-tint": "#4cd7f6",
+                "on-tertiary": "#2d3133",
+                "primary-fixed": "#acedff",
+                "primary-container": "#06b6d4",
+                "on-primary-fixed": "#001f26",
+                "on-tertiary-fixed": "#191c1e",
+                "secondary-fixed-dim": "#4edea3",
+                "inverse-on-surface": "#2b3040",
+                "secondary": "#4edea3",
+                "on-secondary-container": "#00311f",
+                "secondary-fixed": "#6ffbbe",
+                "on-primary-fixed-variant": "#004e5c",
+                "error-container": "#93000a",
+                "on-surface": "#dee1f7",
+                "tertiary-container": "#a4a7a9",
+                "inverse-primary": "#00687a",
+                "surface": "#0e1322",
+                "surface-dim": "#0e1322",
+                "surface-container-low": "#161b2b",
+                "surface-container-lowest": "#090e1c",
+                "on-tertiary-container": "#393d3e",
+                "on-secondary": "#003824",
+                "on-primary": "#003640",
+                "inverse-surface": "#dee1f7",
+                "on-error-container": "#ffdad6",
+                "background": "#0e1322",
+                "outline": "#869397",
+                "tertiary": "#c4c7c9",
+                "surface-variant": "#2f3445",
+                "surface-container-high": "#25293a",
+                "on-tertiary-fixed-variant": "#444749",
+                "primary-fixed-dim": "#4cd7f6",
+                "on-background": "#dee1f7",
+                "on-error": "#690005",
+                "tertiary-fixed": "#e0e3e5",
+                "error": "#ffb4ab",
+                "on-secondary-fixed-variant": "#005236",
+                "primary": "#4cd7f6",
+                "secondary-container": "#00a572",
+                "tertiary-fixed-dim": "#c4c7c9",
+                "on-surface-variant": "#bcc9cd"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.125rem",
+                "lg": "0.25rem",
+                "xl": "0.5rem",
+                "full": "0.75rem"
+            },
+            "spacing": {
+                "container-max": "1280px",
+                "xl": "80px",
+                "xs": "8px",
+                "base": "4px",
+                "lg": "48px",
+                "gutter": "24px",
+                "sm": "16px",
+                "md": "24px"
+            },
+            "fontFamily": {
+                "label-caps": ["JetBrains Mono"],
+                "code-sm": ["JetBrains Mono"],
+                "body-lg": ["Inter"],
+                "headline-lg-mobile": ["Inter"],
+                "body-md": ["Inter"],
+                "headline-md": ["Inter"],
+                "display-lg": ["Inter"],
+                "headline-lg": ["Inter"]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        body {
+            background-color: #0e1322;
+            color: #dee1f7;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+        
+        .glass-nav {
+            backdrop-filter: blur(20px);
+            background: rgba(14, 19, 34, 0.8);
+        }
+
+        .shimmer-text {
+            background: linear-gradient(90deg, #4cd7f6, #4edea3, #4cd7f6);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 4s linear infinite;
+        }
+
+        @keyframes shimmer {
+            to { background-position: 200% center; }
+        }
+
+        .bounding-box {
+            opacity: 0;
+            border-width: 2px;
+            animation: draw-box 0.6s forwards cubic-bezier(0.17, 0.67, 0.83, 0.67);
+        }
+
+        @keyframes draw-box {
+            from { width: 0; height: 0; opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .scan-line {
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #4cd7f6, transparent);
+            position: absolute;
+            top: 0;
+            left: 0;
+            animation: scan 3s linear infinite;
+            z-index: 10;
+        }
+
+        @keyframes scan {
+            from { top: 0; }
+            to { top: 100%; }
+        }
+
+        .reveal { opacity: 0; transform: translateY(20px); }
+        
+    </style>
+
   <!-- Lenis CSS for smooth scroll -->
   <style>
     html.lenis, html.lenis body {
@@ -24,353 +166,200 @@
     }
   </style>
 
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-  
-  <!-- Tailwind Config -->
-  <script id="tailwind-config">
-    tailwind.config = {
-      darkMode: "class",
-      theme: {
-        extend: {
-          colors: {
-            "surface-container": "#1a1f2f",
-            "surface-container-highest": "#2f3445",
-            "surface-bright": "#343949",
-            "on-secondary-fixed": "#002113",
-            "on-primary-container": "#00424f",
-            "outline-variant": "#3d494c",
-            "surface-tint": "#4cd7f6",
-            "on-tertiary": "#2d3133",
-            "primary-fixed": "#acedff",
-            "primary-container": "#06b6d4",
-            "on-primary-fixed": "#001f26",
-            "on-tertiary-fixed": "#191c1e",
-            "secondary-fixed-dim": "#4edea3",
-            "inverse-on-surface": "#2b3040",
-            "secondary": "#4edea3",
-            "on-secondary-container": "#00311f",
-            "secondary-fixed": "#6ffbbe",
-            "on-primary-fixed-variant": "#004e5c",
-            "error-container": "#93000a",
-            "on-surface": "#dee1f7",
-            "tertiary-container": "#a4a7a9",
-            "inverse-primary": "#00687a",
-            "surface": "#0e1322",
-            "surface-dim": "#0e1322",
-            "surface-container-low": "#161b2b",
-            "surface-container-lowest": "#090e1c",
-            "on-tertiary-container": "#393d3e",
-            "on-secondary": "#003824",
-            "on-primary": "#003640",
-            "inverse-surface": "#dee1f7",
-            "on-error-container": "#ffdad6",
-            "background": "#0e1322",
-            "outline": "#869397",
-            "tertiary": "#c4c7c9",
-            "surface-variant": "#2f3445",
-            "surface-container-high": "#25293a",
-            "on-tertiary-fixed-variant": "#444749",
-            "primary-fixed-dim": "#4cd7f6",
-            "on-background": "#dee1f7",
-            "on-error": "#690005",
-            "tertiary-fixed": "#e0e3e5",
-            "error": "#ffb4ab",
-            "on-secondary-fixed-variant": "#005236",
-            "primary": "#4cd7f6",
-            "secondary-container": "#00a572",
-            "tertiary-fixed-dim": "#c4c7c9",
-            "on-surface-variant": "#bcc9cd"
-          },
-          borderRadius: {
-            "DEFAULT": "0.125rem",
-            "lg": "0.25rem",
-            "xl": "0.5rem",
-            "full": "0.75rem"
-          },
-          spacing: {
-            "container-max": "1280px",
-            "xl": "80px",
-            "xs": "8px",
-            "base": "4px",
-            "lg": "48px",
-            "gutter": "24px",
-            "sm": "16px",
-            "md": "24px"
-          },
-          fontFamily: {
-            "label-caps": ["JetBrains Mono"],
-            "code-sm": ["JetBrains Mono"],
-            "body-lg": ["Inter"],
-            "headline-lg-mobile": ["Inter"],
-            "body-md": ["Inter"],
-            "headline-md": ["Inter"],
-            "display-lg": ["Inter"],
-            "headline-lg": ["Inter"]
-          }
-        }
-      }
-    }
-  </script>
-  
-  <style>
-    body {
-      background-color: #0e1322;
-      color: #dee1f7;
-      overflow-x: hidden;
-    }
-    
-    .glass-nav {
-      backdrop-filter: blur(20px);
-      background: rgba(14, 19, 34, 0.8);
-    }
-
-    .shimmer-text {
-      background: linear-gradient(90deg, #4cd7f6, #4edea3, #4cd7f6);
-      background-size: 200% auto;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: shimmer 4s linear infinite;
-    }
-
-    @keyframes shimmer {
-      to { background-position: 200% center; }
-    }
-
-    .bounding-box {
-      opacity: 0;
-      border-width: 2px;
-    }
-
-    .scan-line {
-      width: 100%;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, #4cd7f6, transparent);
-      position: absolute;
-      top: 0;
-      left: 0;
-      animation: scan 3s linear infinite;
-      z-index: 10;
-    }
-
-    @keyframes scan {
-      from { top: 0; }
-      to { top: 100%; }
-    }
-
-    /* Scroll Animations Initial State */
-    .reveal-item {
-      opacity: 0;
-      transform: translateY(30px);
-    }
-  </style>
 </head>
 <body class="font-body-md text-body-md">
+<!-- Navbar -->
+<nav class="fixed top-0 w-full z-50 glass-nav border-b border-outline-variant/30 transition-all duration-300" id="main-nav">
+<div class="flex justify-between items-center px-gutter py-md max-w-container-max mx-auto h-16">
+<div class="flex flex-col">
+<div class="flex items-center h-10"><img src="/static/logo.png" alt="DentAI Logo" class="h-full w-auto object-contain"></div>
 
-  <!-- Navbar -->
-  <nav class="fixed top-0 w-full z-50 glass-nav border-b border-outline-variant/30 transition-all duration-300" id="main-nav">
-    <div class="flex justify-between items-center px-gutter py-md max-w-container-max mx-auto h-16">
-      <div class="flex flex-col">
-        <div class="flex items-center h-10">
-          <img src="/static/logo.png" alt="DentAI Logo" class="h-8 w-auto object-contain">
-        </div>
-      </div>
-      <a class="bg-primary hover:bg-primary-container text-on-primary font-semibold px-4 py-2 rounded-lg transition-transform active:scale-95 text-sm" href="/dashboard/">
-        Get Started
-      </a>
-    </div>
-  </nav>
-
-  <!-- Parallax Blobs -->
-  <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-    <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/10 rounded-full blur-[120px]" id="blob-1"></div>
-    <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-secondary/10 rounded-full blur-[100px]" id="blob-2"></div>
-  </div>
-
-  <!-- Main Content -->
-  <main class="pt-24 pb-xl px-gutter max-w-container-max mx-auto">
-    <!-- Hero Section -->
-    <section class="flex flex-col items-center text-center space-y-md mb-xl reveal-item">
-      <div class="inline-flex items-center gap-2 bg-surface-container-high px-4 py-1.5 rounded-full border border-primary/20 shadow-[0_0_15px_rgba(76,215,246,0.1)]">
-        <span class="text-[10px] uppercase font-label-caps text-primary leading-none">🧪 Test Build V1</span>
-        <span class="w-1 h-1 rounded-full bg-outline-variant"></span>
-        <span class="text-[10px] uppercase font-label-caps text-on-surface-variant leading-none">Engineering Project</span>
-      </div>
-      <h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-display-lg md:text-display-lg text-white max-w-2xl leading-tight">
-        Instant Dental Disease Detection, Powered by <span class="shimmer-text">Intelligence.</span>
-      </h1>
-      <p class="text-on-surface-variant max-w-lg mx-auto font-body-md text-body-md leading-relaxed">
-        A professional-grade diagnostic ecosystem leveraging <span class="text-white font-medium">YOLOv8l</span> deep learning, <span class="text-white font-medium">Django</span>, and <span class="text-white font-medium">React</span> for rapid radiographic analysis.
-      </p>
-      <div class="pt-md">
-        <a class="group relative inline-flex items-center justify-center px-8 py-4 font-bold text-white transition-all duration-200 bg-primary-container hover:bg-cyan-500 rounded-lg focus:outline-none hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] active:scale-95" href="/dashboard/">
-          Launch Diagnostic Dashboard
-          <span class="material-symbols-outlined ml-2 group-hover:translate-x-1 transition-transform">arrow_forward</span>
-        </a>
-      </div>
-    </section>
-
-    <!-- Stats Grid -->
-    <section class="grid grid-cols-2 md:grid-cols-4 gap-base md:gap-gutter mb-xl reveal-item" id="stats">
-      <div class="bg-surface-container-low p-md rounded-xl border border-outline-variant/30 text-center">
-        <div class="text-primary font-headline-md text-headline-md mb-1"><span class="counter" data-target="95">0</span>%</div>
-        <div class="text-on-surface-variant text-[11px] font-label-caps uppercase tracking-widest">Accuracy</div>
-      </div>
-      <div class="bg-surface-container-low p-md rounded-xl border border-outline-variant/30 text-center">
-        <div class="text-primary font-headline-md text-headline-md mb-1">&lt;<span class="counter" data-target="2">0</span>s</div>
-        <div class="text-on-surface-variant text-[11px] font-label-caps uppercase tracking-widest">Inference</div>
-      </div>
-      <div class="bg-surface-container-low p-md rounded-xl border border-outline-variant/30 text-center">
-        <div class="text-primary font-headline-md text-headline-md mb-1 uppercase">YOLOv8l</div>
-        <div class="text-on-surface-variant text-[11px] font-label-caps uppercase tracking-widest">CNN Model</div>
-      </div>
-      <div class="bg-surface-container-low p-md rounded-xl border border-outline-variant/30 text-center">
-        <div class="text-primary font-headline-md text-headline-md mb-1 uppercase">Final</div>
-        <div class="text-on-surface-variant text-[11px] font-label-caps uppercase tracking-widest">Project Phase</div>
-      </div>
-    </section>
-
-    <!-- Diagnostic Visual Container -->
-    <section class="mb-xl reveal-item">
-      <div class="relative bg-surface-container p-base md:p-sm rounded-xl border border-outline-variant/50 shadow-2xl overflow-hidden group">
-        <div class="scan-line"></div>
-        <div class="relative w-full aspect-[2/1] rounded-lg overflow-hidden bg-black">
-          <img class="w-full h-full object-cover opacity-60" alt="Dental panoramic X-ray with overlays" src="/static/hero-xray-sim.jpg" id="visual-xray">
-          <!-- Bounding Boxes Simulation -->
-          <div class="absolute inset-0" id="sim-boxes">
-            <!-- Filling -->
-            <div class="bounding-box absolute border-primary bg-primary/10" style="top: 30%; left: 15%; width: 12%; height: 18%;">
-              <span class="absolute -top-6 left-0 bg-primary text-on-primary text-[10px] px-1.5 font-label-caps rounded">Filling 98%</span>
-            </div>
-            <!-- Crown -->
-            <div class="bounding-box absolute border-secondary bg-secondary/10" style="top: 45%; left: 65%; width: 10%; height: 22%;">
-              <span class="absolute -top-6 left-0 bg-secondary text-on-secondary text-[10px] px-1.5 font-label-caps rounded">Crown 94%</span>
-            </div>
-            <!-- Cavity -->
-            <div class="bounding-box absolute border-error bg-error/10" style="top: 25%; left: 45%; width: 8%; height: 12%;">
-              <span class="absolute -top-6 left-0 bg-error text-on-error text-[10px] px-1.5 font-label-caps rounded">Cavity 91%</span>
-            </div>
-          </div>
-        </div>
-        <div class="absolute bottom-4 right-4 flex gap-2">
-          <span class="bg-surface-bright/80 backdrop-blur px-2 py-1 rounded text-[10px] font-label-caps text-on-surface border border-outline-variant">LIVE ANALYSIS SIMULATION</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- About Section -->
-    <section class="grid grid-cols-1 md:grid-cols-2 gap-lg mb-xl reveal-item">
-      <div class="space-y-md">
-        <h2 class="font-headline-lg text-headline-lg text-white">Diagnostic Precision Built on Research</h2>
-        <p class="text-on-surface-variant leading-relaxed">
-          Developed as a final year engineering project, DentAI Diagnostic solves the bottleneck of manual radiographic analysis. By automating the identification of common pathologies, the system allows clinicians to focus on treatment planning rather than search.
-        </p>
-        <div class="flex flex-wrap gap-xs pt-base">
-          <span class="px-3 py-1 rounded bg-surface-container-highest text-on-surface-variant text-[11px] font-label-caps border border-outline-variant">COMPUTER VISION</span>
-          <span class="px-3 py-1 rounded bg-surface-container-highest text-on-surface-variant text-[11px] font-label-caps border border-outline-variant">PYTORCH</span>
-          <span class="px-3 py-1 rounded bg-surface-container-highest text-on-surface-variant text-[11px] font-label-caps border border-outline-variant">ORTHOPANTOMOGRAM</span>
-          <span class="px-3 py-1 rounded bg-surface-container-highest text-on-surface-variant text-[11px] font-label-caps border border-outline-variant">API DRIVEN</span>
-        </div>
-      </div>
-      <div class="bg-surface-container-low rounded-xl border border-outline-variant/30 p-md flex flex-col justify-center space-y-md">
-        <div class="flex items-start gap-4">
-          <div class="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center shrink-0">
-            <span class="material-symbols-outlined text-primary">analytics</span>
-          </div>
-          <div>
-            <h4 class="text-white font-semibold">Model Performance</h4>
-            <p class="text-sm text-on-surface-variant">Validated against a dataset of 10,000+ labeled dental radiographs with mAP@0.5 score of 0.94.</p>
-          </div>
-        </div>
-        <div class="flex items-start gap-4">
-          <div class="w-10 h-10 rounded-lg bg-secondary/20 flex items-center justify-center shrink-0">
-            <span class="material-symbols-outlined text-secondary">memory</span>
-          </div>
-          <div>
-            <h4 class="text-white font-semibold">Edge Optimization</h4>
-            <p class="text-sm text-on-surface-variant">Architecture designed for sub-2s inference on standard CPU environments without high-end GPU needs.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Features Bento -->
-    <section class="grid grid-cols-1 md:grid-cols-3 gap-md mb-xl reveal-item">
-      <div class="group bg-surface-container-low p-md rounded-xl border border-outline-variant/30 hover:border-primary/50 transition-all duration-300 hover:shadow-[inset_0_0_20px_rgba(76,215,246,0.05)]">
-        <span class="material-symbols-outlined text-primary text-3xl mb-md">auto_awesome</span>
-        <h3 class="text-white font-headline-md text-headline-md mb-2">Automated Detection</h3>
-        <p class="text-on-surface-variant text-sm">Real-time identification of fillings, crowns, implants, and periapical lesions with pixel-perfect accuracy.</p>
-      </div>
-      <div class="group bg-surface-container-low p-md rounded-xl border border-outline-variant/30 hover:border-secondary/50 transition-all duration-300 hover:shadow-[inset_0_0_20px_rgba(78,222,163,0.05)]">
-        <span class="material-symbols-outlined text-secondary text-3xl mb-md">verified</span>
-        <h3 class="text-white font-headline-md text-headline-md mb-2">Confidence Scoring</h3>
-        <p class="text-on-surface-variant text-sm">Every detection includes a statistical confidence percentage, ensuring clinical reliability and transparency.</p>
-      </div>
-      <div class="group bg-surface-container-low p-md rounded-xl border border-outline-variant/30 hover:border-primary/50 transition-all duration-300 hover:shadow-[inset_0_0_20px_rgba(76,215,246,0.05)]">
-        <span class="material-symbols-outlined text-primary text-3xl mb-md">bolt</span>
-        <h3 class="text-white font-headline-md text-headline-md mb-2">Fast Inference</h3>
-        <p class="text-on-surface-variant text-sm">Optimized pipeline ensures results are generated almost instantly upon upload, streamlining the diagnostic workflow.</p>
-      </div>
-    </section>
-
-    <!-- How It Works -->
-    <section class="mb-xl reveal-item">
-      <h2 class="font-headline-lg text-headline-lg text-white mb-lg text-center">Implementation Flow</h2>
-      <div class="space-y-md">
-        <div class="flex items-center gap-md">
-          <div class="w-12 h-12 rounded-full border border-primary/40 bg-primary/10 flex items-center justify-center shrink-0 font-bold text-primary">01</div>
-          <div class="flex-1 pb-md border-b border-outline-variant/30">
-            <h4 class="text-white font-semibold">Radiograph Upload</h4>
-            <p class="text-sm text-on-surface-variant">Securely ingest panoramic or bitewing X-rays via the React-based frontend.</p>
-          </div>
-        </div>
-        <div class="flex items-center gap-md">
-          <div class="w-12 h-12 rounded-full border border-secondary/40 bg-secondary/10 flex items-center justify-center shrink-0 font-bold text-secondary">02</div>
-          <div class="flex-1 pb-md border-b border-outline-variant/30">
-            <h4 class="text-white font-semibold">AI Processing</h4>
-            <p class="text-sm text-on-surface-variant">YOLOv8l scans the image, generating feature maps and localization boxes.</p>
-          </div>
-        </div>
-        <div class="flex items-center gap-md">
-          <div class="w-12 h-12 rounded-full border border-primary/40 bg-primary/10 flex items-center justify-center shrink-0 font-bold text-primary">03</div>
-          <div class="flex-1">
-            <h4 class="text-white font-semibold">Diagnostic Review</h4>
-            <p class="text-sm text-on-surface-variant">Review annotated findings with high-confidence markers for medical sign-off.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Closing CTA -->
-    <section class="bg-gradient-to-br from-primary/20 via-surface-container to-secondary/20 p-xl rounded-3xl border border-outline-variant/50 text-center space-y-md reveal-item">
-      <h2 class="font-display-lg text-headline-lg text-white">Diagnose Smarter.<br>Detect Faster.</h2>
-      <p class="text-on-surface-variant max-w-md mx-auto">
-        Ready to experience the future of dental radiography? Launch the prototype dashboard now.
-      </p>
-      <div class="pt-sm">
-        <a class="bg-white text-black px-8 py-4 rounded-lg font-bold hover:scale-105 active:scale-95 transition-all inline-block shadow-[0_10px_40px_rgba(255,255,255,0.1)] hover:bg-slate-100" href="/dashboard/">
-          Access System
-        </a>
-      </div>
-    </section>
-  </main>
-
-  <!-- Footer -->
-  <footer class="bg-surface-container-lowest border-t border-outline-variant py-xl">
-    <div class="max-w-container-max mx-auto px-gutter flex flex-col md:flex-row justify-between items-center gap-md">
-      <div class="text-center md:text-left">
-        <div class="text-label-caps text-on-surface-variant mb-2">DENTAI DIAGNOSTIC</div>
-        <p class="text-on-surface-variant text-sm opacity-60">© 2024 Final Year Project — V1.0.0. Engineering Team Alpha.</p>
-      </div>
-      <div class="flex gap-md text-on-surface-variant text-sm">
-        <a class="hover:text-primary transition-colors" href="#">Documentation</a>
-        <a class="hover:text-primary transition-colors" href="#">Tech Specs</a>
-        <a class="hover:text-primary transition-colors" href="#">Source</a>
-      </div>
-    </div>
-  </footer>
+</div>
+<a class="bg-primary hover:bg-primary-container text-on-primary font-semibold px-4 py-2 rounded-lg transition-transform active:scale-95 text-sm" href="/dashboard/">
+                Get Started
+            </a>
+</div>
+</nav>
+<!-- Parallax Blobs -->
+<div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+<div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/10 rounded-full blur-[120px]" id="blob-1" style="transform: translate(26.7949px, 1.22741px);"></div>
+<div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-secondary/10 rounded-full blur-[100px]" id="blob-2" style="transform: translate(-16.0769px, -0.736445px);"></div>
+</div>
+<!-- Main Content -->
+<main class="pt-24 pb-xl px-gutter max-w-container-max mx-auto">
+<!-- Hero Section -->
+<section class="flex flex-col items-center text-center space-y-md mb-xl">
+<div class="inline-flex items-center gap-2 bg-surface-container-high px-4 py-1.5 rounded-full border border-primary/20 shadow-[0_0_15px_rgba(76,215,246,0.1)]">
+<span class="text-[10px] uppercase font-label-caps text-primary leading-none">🧪 Test Build V1</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+<span class="text-[10px] uppercase font-label-caps text-on-surface-variant leading-none">Engineering Project</span>
+</div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-display-lg md:text-display-lg text-white max-w-2xl leading-tight">
+                Instant Dental Disease Detection, Powered by <span class="shimmer-text">Intelligence.</span>
+</h1>
+<p class="text-on-surface-variant max-w-lg mx-auto font-body-md text-body-md leading-relaxed">
+                A professional-grade diagnostic ecosystem leveraging <span class="text-white font-medium">YOLOv8l</span> deep learning, <span class="text-white font-medium">Django</span>, and <span class="text-white font-medium">React</span> for rapid radiographic analysis.
+            </p>
+<div class="pt-md">
+<a class="group relative inline-flex items-center justify-center px-8 py-4 font-bold text-white transition-all duration-200 bg-primary-container rounded-lg focus:outline-none hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] active:scale-95" href="/dashboard/">
+                    Launch Diagnostic Dashboard
+                    <span class="material-symbols-outlined ml-2 group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</a>
+</div>
+</section>
+<!-- Stats Grid -->
+<section class="grid grid-cols-2 md:grid-cols-4 gap-base md:gap-gutter mb-xl reveal visible" id="stats">
+<div class="bg-surface-container-low p-md rounded-xl border border-outline-variant/30 text-center">
+<div class="text-primary font-headline-md text-headline-md mb-1"><span class="counter" data-target="95">91</span>%</div>
+<div class="text-on-surface-variant text-[11px] font-label-caps uppercase tracking-widest">Accuracy</div>
+</div>
+<div class="bg-surface-container-low p-md rounded-xl border border-outline-variant/30 text-center">
+<div class="text-primary font-headline-md text-headline-md mb-1">&lt;<span class="counter" data-target="2">2</span>s</div>
+<div class="text-on-surface-variant text-[11px] font-label-caps uppercase tracking-widest">Inference</div>
+</div>
+<div class="bg-surface-container-low p-md rounded-xl border border-outline-variant/30 text-center">
+<div class="text-primary font-headline-md text-headline-md mb-1 uppercase">YOLOv8l</div>
+<div class="text-on-surface-variant text-[11px] font-label-caps uppercase tracking-widest">CNN Model</div>
+</div>
+<div class="bg-surface-container-low p-md rounded-xl border border-outline-variant/30 text-center">
+<div class="text-primary font-headline-md text-headline-md mb-1 uppercase">Final</div>
+<div class="text-on-surface-variant text-[11px] font-label-caps uppercase tracking-widest">Project Phase</div>
+</div>
+</section>
+<!-- Diagnostic Visual Container -->
+<section class="mb-xl reveal visible">
+<div class="relative bg-surface-container p-base md:p-sm rounded-xl border border-outline-variant/50 shadow-2xl overflow-hidden group">
+<div class="scan-line"></div>
+<div class="relative w-full aspect-[2/1] rounded-lg overflow-hidden bg-black">
+<img class="w-full h-full object-cover opacity-60" data-alt="A cinematic, high-resolution dental panoramic X-ray (orthopantomogram) displayed on a professional diagnostic monitor in a dark medical office. The image shows the full mandible and maxilla with high contrast and sharp bone details. Subtle digital overlays including a blue grid and technical metadata are visible at the edges, creating a mission-control medical aesthetic. The lighting is cold and clinical, focused entirely on the radiographic scan." src="/static/hero-xray-sim.jpg">
+<!-- Bounding Boxes Simulation -->
+<div class="absolute inset-0" id="sim-boxes">
+<!-- Filling -->
+<div class="bounding-box absolute border-primary bg-primary/10" style="top: 30%; left: 15%; width: 12%; height: 18%;">
+<span class="absolute -top-6 left-0 bg-primary text-on-primary text-[10px] px-1.5 font-label-caps rounded">Filling 98%</span>
+</div>
+<!-- Crown -->
+<div class="bounding-box absolute border-secondary bg-secondary/10" style="top: 45%; left: 65%; width: 10%; height: 22%;">
+<span class="absolute -top-6 left-0 bg-secondary text-on-secondary text-[10px] px-1.5 font-label-caps rounded">Crown 94%</span>
+</div>
+<!-- Cavity -->
+<div class="bounding-box absolute border-error bg-error/10" style="top: 25%; left: 45%; width: 8%; height: 12%;">
+<span class="absolute -top-6 left-0 bg-error text-on-error text-[10px] px-1.5 font-label-caps rounded">Cavity 91%</span>
+</div>
+</div>
+</div>
+<div class="absolute bottom-4 right-4 flex gap-2">
+<span class="bg-surface-bright/80 backdrop-blur px-2 py-1 rounded text-[10px] font-label-caps text-on-surface border border-outline-variant">LIVE ANALYSIS SIMULATION</span>
+</div>
+</div>
+</section>
+<!-- About Section -->
+<section class="grid grid-cols-1 md:grid-cols-2 gap-lg mb-xl reveal visible">
+<div class="space-y-md">
+<h2 class="font-headline-lg text-headline-lg text-white">Diagnostic Precision Built on Research</h2>
+<p class="text-on-surface-variant leading-relaxed">
+                    Developed as a final year engineering project, DentAI Diagnostic solves the bottleneck of manual radiographic analysis. By automating the identification of common pathologies, the system allows clinicians to focus on treatment planning rather than search.
+                </p>
+<div class="flex flex-wrap gap-xs pt-base">
+<span class="px-3 py-1 rounded bg-surface-container-highest text-on-surface-variant text-[11px] font-label-caps border border-outline-variant">COMPUTER VISION</span>
+<span class="px-3 py-1 rounded bg-surface-container-highest text-on-surface-variant text-[11px] font-label-caps border border-outline-variant">PYTORCH</span>
+<span class="px-3 py-1 rounded bg-surface-container-highest text-on-surface-variant text-[11px] font-label-caps border border-outline-variant">ORTHOPANTOMOGRAM</span>
+<span class="px-3 py-1 rounded bg-surface-container-highest text-on-surface-variant text-[11px] font-label-caps border border-outline-variant">API DRIVEN</span>
+</div>
+</div>
+<div class="bg-surface-container-low rounded-xl border border-outline-variant/30 p-md flex flex-col justify-center space-y-md">
+<div class="flex items-start gap-4">
+<div class="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary">analytics</span>
+</div>
+<div>
+<h4 class="text-white font-semibold">Model Performance</h4>
+<p class="text-sm text-on-surface-variant">Validated against a dataset of 10,000+ labeled dental radiographs with mAP@0.5 score of 0.94.</p>
+</div>
+</div>
+<div class="flex items-start gap-4">
+<div class="w-10 h-10 rounded-lg bg-secondary/20 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-secondary">memory</span>
+</div>
+<div>
+<h4 class="text-white font-semibold">Edge Optimization</h4>
+<p class="text-sm text-on-surface-variant">Architecture designed for sub-2s inference on standard CPU environments without high-end GPU needs.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Features Bento -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-md mb-xl reveal visible">
+<div class="group bg-surface-container-low p-md rounded-xl border border-outline-variant/30 hover:border-primary/50 transition-all duration-300 hover:shadow-[inset_0_0_20px_rgba(76,215,246,0.05)]">
+<span class="material-symbols-outlined text-primary text-3xl mb-md">auto_awesome</span>
+<h3 class="text-white font-headline-md text-headline-md mb-2">Automated Detection</h3>
+<p class="text-on-surface-variant text-sm">Real-time identification of fillings, crowns, implants, and periapical lesions with pixel-perfect accuracy.</p>
+</div>
+<div class="group bg-surface-container-low p-md rounded-xl border border-outline-variant/30 hover:border-secondary/50 transition-all duration-300 hover:shadow-[inset_0_0_20px_rgba(78,222,163,0.05)]">
+<span class="material-symbols-outlined text-secondary text-3xl mb-md">verified</span>
+<h3 class="text-white font-headline-md text-headline-md mb-2">Confidence Scoring</h3>
+<p class="text-on-surface-variant text-sm">Every detection includes a statistical confidence percentage, ensuring clinical reliability and transparency.</p>
+</div>
+<div class="group bg-surface-container-low p-md rounded-xl border border-outline-variant/30 hover:border-primary/50 transition-all duration-300 hover:shadow-[inset_0_0_20px_rgba(76,215,246,0.05)]">
+<span class="material-symbols-outlined text-primary text-3xl mb-md">bolt</span>
+<h3 class="text-white font-headline-md text-headline-md mb-2">Fast Inference</h3>
+<p class="text-on-surface-variant text-sm">Optimized pipeline ensures results are generated almost instantly upon upload, streamlining the diagnostic workflow.</p>
+</div>
+</section>
+<!-- How It Works -->
+<section class="mb-xl reveal visible">
+<h2 class="font-headline-lg text-headline-lg text-white mb-lg text-center">Implementation Flow</h2>
+<div class="space-y-md">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-full border border-primary/40 bg-primary/10 flex items-center justify-center shrink-0 font-bold text-primary">01</div>
+<div class="flex-1 pb-md border-b border-outline-variant/30">
+<h4 class="text-white font-semibold">Radiograph Upload</h4>
+<p class="text-sm text-on-surface-variant">Securely ingest panoramic or bitewing X-rays via the React-based frontend.</p>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-full border border-secondary/40 bg-secondary/10 flex items-center justify-center shrink-0 font-bold text-secondary">02</div>
+<div class="flex-1 pb-md border-b border-outline-variant/30">
+<h4 class="text-white font-semibold">AI Processing</h4>
+<p class="text-sm text-on-surface-variant">YOLOv8l scans the image, generating feature maps and localization boxes.</p>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-full border border-primary/40 bg-primary/10 flex items-center justify-center shrink-0 font-bold text-primary">03</div>
+<div class="flex-1">
+<h4 class="text-white font-semibold">Diagnostic Review</h4>
+<p class="text-sm text-on-surface-variant">Review annotated findings with high-confidence markers for medical sign-off.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Closing CTA -->
+<section class="bg-gradient-to-br from-primary/20 via-surface-container to-secondary/20 p-xl rounded-3xl border border-outline-variant/50 text-center space-y-md reveal visible">
+<h2 class="font-display-lg text-headline-lg text-white">Diagnose Smarter.<br>Detect Faster.</h2>
+<p class="text-on-surface-variant max-w-md mx-auto">
+                Ready to experience the future of dental radiography? Launch the prototype dashboard now.
+            </p>
+<div class="pt-sm">
+<a class="bg-white text-black px-8 py-4 rounded-lg font-bold hover:scale-105 active:scale-95 transition-all inline-block shadow-[0_10px_40px_rgba(255,255,255,0.1)]" href="/dashboard/">
+                    Access System
+                </a>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest border-t border-outline-variant py-xl">
+<div class="max-w-container-max mx-auto px-gutter flex flex-col md:flex-row justify-between items-center gap-md">
+<div class="text-center md:text-left">
+<div class="text-label-caps text-on-surface-variant mb-2">DENTAI DIAGNOSTIC</div>
+<p class="text-on-surface-variant text-sm opacity-60">© 2024 Final Year Project — V1.0.0. Engineering Team Alpha.</p>
+</div>
+<div class="flex gap-md text-on-surface-variant text-sm">
+<a class="hover:text-primary transition-colors" href="#">Documentation</a>
+<a class="hover:text-primary transition-colors" href="#">Tech Specs</a>
+<a class="hover:text-primary transition-colors" href="#">Source</a>
+</div>
+</div>
+</footer>
 
   <!-- GSAP + ScrollTrigger + Lenis Smooth Scroll CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -390,6 +379,7 @@
       touchMultiplier: 2,
       infinite: false,
     });
+
     // Integrate Lenis with GSAP ScrollTrigger
     lenis.on('scroll', ScrollTrigger.update);
     gsap.ticker.add((time)=>{
@@ -400,14 +390,20 @@
     // Register ScrollTrigger plugin
     gsap.registerPlugin(ScrollTrigger);
 
-    // GSAP Scroll-Reveal fade+slide animations
-    const revealItems = document.querySelectorAll('.reveal-item');
+    // GSAP Scroll-Reveal fade+slide animations on all sections
+    const revealItems = document.querySelectorAll('.reveal');
     revealItems.forEach((item) => {
       gsap.to(item, {
         scrollTrigger: {
           trigger: item,
           start: 'top 85%',
           toggleActions: 'play none none none',
+          onEnter: () => {
+            // Trigger counters if this is the stats section
+            if (item.id === 'stats') {
+              startCounters();
+            }
+          }
         },
         opacity: 1,
         y: 0,
@@ -416,7 +412,46 @@
       });
     });
 
-    // Bounding Box Animation Trigger on entering viewport
+    // Stats Counter Animation
+    function startCounters() {
+      document.querySelectorAll('.counter').forEach(counter => {
+        const target = +counter.getAttribute('data-target');
+        const obj = { count: 0 };
+        gsap.to(obj, {
+          count: target,
+          duration: 2.0,
+          ease: 'power2.out',
+          onUpdate: () => {
+            counter.innerText = Math.ceil(obj.count);
+          }
+        });
+      });
+    }
+
+    // Navbar Scroll Effect
+    window.addEventListener('scroll', () => {
+      const nav = document.getElementById('main-nav');
+      if (window.scrollY > 50) {
+        nav.classList.add('py-2');
+        nav.classList.remove('py-md');
+        nav.style.background = 'rgba(14, 19, 34, 0.95)';
+      } else {
+        nav.classList.remove('py-2');
+        nav.classList.add('py-md');
+        nav.style.background = 'rgba(14, 19, 34, 0.8)';
+      }
+    });
+
+    // Parallax background blobs
+    window.addEventListener('mousemove', (e) => {
+      const x = (e.clientX / window.innerWidth - 0.5) * 40;
+      const y = (e.clientY / window.innerHeight - 0.5) * 40;
+      
+      gsap.to('#blob-1', { x: x, y: y, duration: 1.0, ease: 'power2.out' });
+      gsap.to('#blob-2', { x: -x * 0.8, y: -y * 0.8, duration: 1.0, ease: 'power2.out' });
+    });
+
+    // Restart bounding box animation on scroll into view
     const simBoxes = document.getElementById('sim-boxes');
     if (simBoxes) {
       ScrollTrigger.create({
@@ -436,49 +471,9 @@
         }
       });
     }
-
-    // Stats Counter Animation using ScrollTrigger
-    ScrollTrigger.create({
-      trigger: '#stats',
-      start: 'top 85%',
-      onEnter: () => {
-        document.querySelectorAll('.counter').forEach(counter => {
-          const target = +counter.getAttribute('data-target');
-          const obj = { count: 0 };
-          gsap.to(obj, {
-            count: target,
-            duration: 2.0,
-            ease: 'power2.out',
-            onUpdate: () => {
-              counter.innerText = Math.ceil(obj.count);
-            }
-          });
-        });
-      }
-    });
-
-    // Navbar scroll effect
-    window.addEventListener('scroll', () => {
-      const nav = document.getElementById('main-nav');
-      if (window.scrollY > 50) {
-        nav.classList.add('py-2');
-        nav.classList.remove('py-md');
-        nav.style.background = 'rgba(14, 19, 34, 0.95)';
-      } else {
-        nav.classList.remove('py-2');
-        nav.classList.add('py-md');
-        nav.style.background = 'rgba(14, 19, 34, 0.8)';
-      }
-    });
-
-    // Parallax background blobs movement
-    window.addEventListener('mousemove', (e) => {
-      const x = (e.clientX / window.innerWidth - 0.5) * 40;
-      const y = (e.clientY / window.innerHeight - 0.5) * 40;
-      
-      gsap.to('#blob-1', { x: x, y: y, duration: 1.0, ease: 'power2.out' });
-      gsap.to('#blob-2', { x: -x * 0.8, y: -y * 0.8, duration: 1.0, ease: 'power2.out' });
-    });
   </script>
-</body>
-</html>
+
+
+
+</body></html>
+
