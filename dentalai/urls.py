@@ -8,21 +8,41 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import TemplateView
+from django.contrib.auth import views as auth_views
+from django.contrib.auth.decorators import login_required
+
+# Wrap template views with login_required so unauthenticated users are redirected to /login/
+def protected_template(template_name):
+    return login_required(
+        TemplateView.as_view(template_name=template_name),
+        login_url='/login/'
+    )
+
+from django.contrib.auth import logout
+from django.shortcuts import redirect
+
+def logout_view(request):
+    logout(request)
+    return redirect('login')
 
 urlpatterns = [
     # ── Django Admin ────────────────────────────────────────────────────────
     path('admin/', admin.site.urls),
 
+    # ── Auth ────────────────────────────────────────────────────────────────
+    path('login/',  auth_views.LoginView.as_view(template_name='login.html'), name='login'),
+    path('logout/', logout_view,                                              name='logout'),
+
     # ── REST API routes ─────────────────────────────────────────────────────
     path('api/', include('core.urls')),
 
-    # ── Stitch MCP Frontend Screens (served as Django templates) ───────────
-    path('',            TemplateView.as_view(template_name='home.html'),           name='home-page'),
-    path('dashboard/',  TemplateView.as_view(template_name='dashboard.html'),      name='dashboard-page'),
-    path('upload/',     TemplateView.as_view(template_name='upload_scan.html'),    name='upload-page'),
-    path('results/',    TemplateView.as_view(template_name='results.html'),        name='results-page'),
-    path('history/',    TemplateView.as_view(template_name='patient_history.html'),name='history-page'),
-    path('reports/',    TemplateView.as_view(template_name='report.html'),         name='report-page'),
+    # ── Frontend Pages (protected — require login) ──────────────────────────
+    path('',           TemplateView.as_view(template_name='home.html'),           name='home-page'),
+    path('dashboard/', protected_template('dashboard.html'),      name='dashboard-page'),
+    path('upload/',    protected_template('upload_scan.html'),    name='upload-page'),
+    path('results/',   protected_template('results.html'),        name='results-page'),
+    path('history/',   protected_template('patient_history.html'),name='history-page'),
+    path('reports/',   protected_template('report.html'),         name='report-page'),
 ]
 
 # Serve media files in all environments (for serverless/ephemeral /tmp uploads)
@@ -35,3 +55,4 @@ urlpatterns += [
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])
+
