@@ -5,6 +5,7 @@ Defines: Patient, Scan, DetectionResult, ScanComparison
 
 from django.db import models
 from django.utils import timezone
+from django.contrib.auth.models import User
 import uuid
 
 
@@ -19,6 +20,7 @@ class Patient(models.Model):
 
     # Unique patient identifier (e.g., PT-2024-0001)
     patient_id = models.CharField(max_length=20, unique=True, editable=False)
+    doctor      = models.ForeignKey(User, on_delete=models.CASCADE, related_name='patients', null=True, blank=True)
     first_name  = models.CharField(max_length=100)
     last_name   = models.CharField(max_length=100)
     age         = models.PositiveIntegerField()

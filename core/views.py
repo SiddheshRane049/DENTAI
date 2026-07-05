@@ -33,7 +33,157 @@ from .serializers import (
     ScanUploadSerializer, DashboardStatsSerializer,
 )
 
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
+from django.core.mail import send_mail
+import random
+import time
+
 logger = logging.getLogger(__name__)
+
+
+# ─── Doctor Auth Views ────────────────────────────────────────────────────────
+
+def register_view(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard-page')
+
+    if request.method == 'POST':
+        full_name = request.POST.get('full_name', '').strip()
+        username = request.POST.get('username', '').strip()
+        email = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '')
+        confirm_password = request.POST.get('confirm_password', '')
+
+        if not full_name or not username or not email or not password:
+            return render(request, 'register.html', {'error': 'All fields are required.', 'data': request.POST})
+
+        if password != confirm_password:
+            return render(request, 'register.html', {'error': 'Passwords do not match.', 'data': request.POST})
+
+        if User.objects.filter(username=username).exists():
+            return render(request, 'register.html', {'error': 'Username already exists.', 'data': request.POST})
+
+        if User.objects.filter(email=email).exists():
+            return render(request, 'register.html', {'error': 'Email address already registered.', 'data': request.POST})
+
+        try:
+            parts = full_name.split(' ', 1)
+            first_name = parts[0]
+            last_name = parts[1] if len(parts) > 1 else ''
+
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=password,
+                first_name=first_name,
+                last_name=last_name
+            )
+
+            try:
+                subject = 'Welcome to DentAI!'
+                message = f"Hello Dr. {full_name},\n\nWelcome to DentAI Diagnostic System! Your doctor account has been successfully created.\n\nUsername: {username}\nEmail: {email}\n\nYou can now log in to upload scans, run diagnostics, and generate patient reports.\n\nBest Regards,\nDentAI Team"
+                send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email], fail_silently=True)
+            except Exception as e:
+                logger.error(f"Failed to send welcome email to {email}: {e}")
+
+            login(request, user)
+            return redirect('dashboard-page')
+        except Exception as e:
+            return render(request, 'register.html', {'error': f'Registration failed: {e}', 'data': request.POST})
+
+    return render(request, 'register.html')
+
+
+def login_view(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard-page')
+
+    next_url = request.GET.get('next', request.POST.get('next', ''))
+
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '')
+
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            otp = f"{random.randint(100000, 999999)}"
+
+            request.session['pre_auth_user_id'] = user.id
+            request.session['otp_code'] = otp
+            request.session['otp_expiry'] = time.time() + 300  # 5 minutes
+            request.session['next_url'] = next_url
+
+            try:
+                subject = 'DentAI 2-Step Verification Code'
+                message = f"Hello Dr. {user.first_name} {user.last_name},\n\nYour 2-step verification code is: {otp}\n\nThis code will expire in 5 minutes.\n\nBest Regards,\nDentAI Team"
+                send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email], fail_silently=False)
+                logger.info(f"Verification code sent to {user.email}: {otp}")
+            except Exception as e:
+                logger.error(f"Failed to send verification code email: {e}")
+
+            return redirect('verify-otp')
+        else:
+            return render(request, 'login.html', {'form': {'errors': True}, 'next': next_url})
+
+    return render(request, 'login.html', {'next': next_url})
+
+
+def verify_otp_view(request):
+    user_id = request.session.get('pre_auth_user_id')
+    saved_otp = request.session.get('otp_code')
+    expiry = request.session.get('otp_expiry', 0)
+    next_url = request.session.get('next_url')
+
+    if not user_id or not saved_otp:
+        return redirect('login')
+
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return redirect('login')
+
+    if request.GET.get('resend') == '1':
+        otp = f"{random.randint(100000, 999999)}"
+        request.session['otp_code'] = otp
+        request.session['otp_expiry'] = time.time() + 300
+        try:
+            subject = 'DentAI 2-Step Verification Code (Resent)'
+            message = f"Hello Dr. {user.first_name} {user.last_name},\n\nYour new 2-step verification code is: {otp}\n\nThis code will expire in 5 minutes.\n\nBest Regards,\nDentAI Team"
+            send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email], fail_silently=False)
+            logger.info(f"Resent verification code to {user.email}: {otp}")
+        except Exception as e:
+            logger.error(f"Failed to resend verification code: {e}")
+        return redirect('verify-otp')
+
+    if request.method == 'POST':
+        entered_otp = request.POST.get('otp', '').strip()
+
+        if time.time() > expiry:
+            return render(request, 'verify_otp.html', {
+                'email': user.email,
+                'error': 'Verification code has expired. Please request a new one.'
+            })
+
+        if entered_otp == saved_otp:
+            login(request, user)
+
+            request.session.pop('pre_auth_user_id', None)
+            request.session.pop('otp_code', None)
+            request.session.pop('otp_expiry', None)
+            request.session.pop('next_url', None)
+
+            if next_url:
+                return redirect(next_url)
+            return redirect('dashboard-page')
+        else:
+            return render(request, 'verify_otp.html', {
+                'email': user.email,
+                'error': 'Invalid verification code. Please try again.'
+            })
+
+    return render(request, 'verify_otp.html', {'email': user.email})
 
 
 # ─── Dashboard ────────────────────────────────────────────────────────────────
@@ -48,17 +198,19 @@ class DashboardView(APIView):
         today = timezone.now().date()
         month_start = today.replace(day=1)
 
+        # Get querysets isolated to the logged-in doctor
+        patients_qs = Patient.objects.filter(doctor=request.user)
+        scans_qs = Scan.objects.filter(patient__doctor=request.user)
+
         stats = {
-            'total_patients':   Patient.objects.count(),
-            'total_scans':      Scan.objects.count(),
-            'scans_today':      Scan.objects.filter(created_at__date=today).count(),
-            'scans_this_month': Scan.objects.filter(created_at__date__gte=month_start).count(),
-            'pending_scans':    Scan.objects.filter(status='pending').count(),
-            'high_severity':    Scan.objects.filter(
-                                    results__severity='high'
-                                ).distinct().count(),
+            'total_patients':   patients_qs.count(),
+            'total_scans':      scans_qs.count(),
+            'scans_today':      scans_qs.filter(created_at__date=today).count(),
+            'scans_this_month': scans_qs.filter(created_at__date__gte=month_start).count(),
+            'pending_scans':    scans_qs.filter(status='pending').count(),
+            'high_severity':    scans_qs.filter(results__severity='high').distinct().count(),
             'recent_scans': ScanListSerializer(
-                Scan.objects.select_related('patient').order_by('-created_at')[:8],
+                scans_qs.select_related('patient').order_by('-created_at')[:8],
                 many=True,
                 context={'request': request},
             ).data,
@@ -95,16 +247,17 @@ class ScanUploadView(APIView):
         data = serializer.validated_data
 
         # ── Resolve or create Patient ──────────────────────────────────────
-        patient = self._get_or_create_patient(data)
+        patient = self._get_or_create_patient(data, request)
         if isinstance(patient, Response):   # Error response
             return patient
 
         # ── Create Scan record ─────────────────────────────────────────────
+        doctor_name_default = f"Dr. {request.user.first_name} {request.user.last_name}"
         scan = Scan.objects.create(
             patient       = patient,
             scan_type     = data['scan_type'],
             original_image= data['image'],
-            doctor_name   = data.get('doctor_name', ''),
+            doctor_name   = data.get('doctor_name') or doctor_name_default,
             doctor_notes  = data.get('doctor_notes', ''),
             status        = 'processing',
         )
@@ -134,12 +287,12 @@ class ScanUploadView(APIView):
 
     # ── Helpers ───────────────────────────────────────────────────────────────
 
-    def _get_or_create_patient(self, data):
+    def _get_or_create_patient(self, data, request):
         """Resolve existing patient by ID or create a new one."""
         pid_code = data.get('patient_id_code')
         if pid_code:
             try:
-                return Patient.objects.get(patient_id=pid_code)
+                return Patient.objects.get(patient_id=pid_code, doctor=request.user)
             except Patient.DoesNotExist:
                 return Response(
                     {'error': f"Patient '{pid_code}' not found."},
@@ -152,6 +305,7 @@ class ScanUploadView(APIView):
             last_name =data['last_name'],
             age       =data['age'],
             gender    =data.get('gender', 'M'),
+            doctor    =request.user,
         )
 
     def _run_detection_async(self, scan_id: int):
@@ -216,12 +370,12 @@ class ScanUploadView(APIView):
             logger.error(f"Detection failed for scan {scan_id}: {e}", exc_info=True)
             Scan.objects.filter(id=scan_id).update(status='failed')
 
-def _get_scan_by_pk_or_uuid(pk, select_related_patient=False, prefetch_results=False):
+def _get_scan_by_pk_or_uuid(pk, request, select_related_patient=False, prefetch_results=False):
     import uuid
     from django.http import Http404
     from .models import Scan
 
-    qs = Scan.objects.all()
+    qs = Scan.objects.filter(patient__doctor=request.user)
     if select_related_patient:
         qs = qs.select_related('patient')
     if prefetch_results:
@@ -246,7 +400,7 @@ class ScanStatusView(APIView):
     """
 
     def get(self, request, pk):
-        scan = _get_scan_by_pk_or_uuid(pk)
+        scan = _get_scan_by_pk_or_uuid(pk, request)
         return Response({'status': scan.status, 'scan_id': str(scan.scan_id)})
 
 
@@ -261,7 +415,7 @@ class ScanDetailView(generics.RetrieveAPIView):
 
     def get_object(self):
         pk = self.kwargs.get('pk')
-        return _get_scan_by_pk_or_uuid(pk, select_related_patient=True, prefetch_results=True)
+        return _get_scan_by_pk_or_uuid(pk, self.request, select_related_patient=True, prefetch_results=True)
 
     def get_serializer_context(self):
         ctx = super().get_serializer_context()
@@ -278,7 +432,7 @@ class ScanListView(generics.ListAPIView):
     serializer_class = ScanListSerializer
 
     def get_queryset(self):
-        qs = Scan.objects.select_related('patient').order_by('-created_at')
+        qs = Scan.objects.filter(patient__doctor=self.request.user).select_related('patient').order_by('-created_at')
 
         # Filter by patient ID code
         pid = self.request.query_params.get('patient_id')
@@ -314,8 +468,13 @@ class PatientListCreateView(generics.ListCreateAPIView):
     GET  /api/patients/  → List all patients
     POST /api/patients/  → Create new patient
     """
-    queryset         = Patient.objects.all().order_by('-created_at')
     serializer_class = PatientSerializer
+
+    def get_queryset(self):
+        return Patient.objects.filter(doctor=self.request.user).order_by('-created_at')
+
+    def perform_create(self, serializer):
+        serializer.save(doctor=self.request.user)
 
 
 class PatientScanHistoryView(generics.ListAPIView):
@@ -327,6 +486,7 @@ class PatientScanHistoryView(generics.ListAPIView):
 
     def get_queryset(self):
         return Scan.objects.filter(
+            patient__doctor=self.request.user,
             patient__patient_id=self.kwargs['patient_id']
         ).order_by('-created_at')
 
@@ -348,7 +508,7 @@ class ReportGenerateView(APIView):
     """
 
     def post(self, request, pk):
-        scan = _get_scan_by_pk_or_uuid(pk, prefetch_results=True)
+        scan = _get_scan_by_pk_or_uuid(pk, request, prefetch_results=True)
 
         if scan.status != 'completed':
             return Response(
@@ -391,7 +551,7 @@ class ReportDownloadView(APIView):
     """
 
     def get(self, request, pk):
-        scan = _get_scan_by_pk_or_uuid(pk, select_related_patient=True)
+        scan = _get_scan_by_pk_or_uuid(pk, request, select_related_patient=True)
 
         if not scan.report_pdf:
             return Response(
@@ -413,3 +573,4 @@ class ReportDownloadView(APIView):
         )
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
         return response
+

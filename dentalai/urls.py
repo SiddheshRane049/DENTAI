@@ -20,6 +20,7 @@ def protected_template(template_name):
 
 from django.contrib.auth import logout
 from django.shortcuts import redirect
+from core import views as core_views
 
 def logout_view(request):
     logout(request)
@@ -30,8 +31,10 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     # ── Auth ────────────────────────────────────────────────────────────────
-    path('login/',  auth_views.LoginView.as_view(template_name='login.html'), name='login'),
-    path('logout/', logout_view,                                              name='logout'),
+    path('login/',      core_views.login_view,      name='login'),
+    path('register/',   core_views.register_view,   name='register'),
+    path('verify-otp/', core_views.verify_otp_view, name='verify-otp'),
+    path('logout/',     logout_view,                name='logout'),
 
     # ── REST API routes ─────────────────────────────────────────────────────
     path('api/', include('core.urls')),
