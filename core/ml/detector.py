@@ -191,16 +191,16 @@ FDI_LOWER = [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38]
 
 # ─── Clinical display band ────────────────────────────────────────────────────
 DISPLAY_MIN = 0.85
-DISPLAY_MAX = 0.88
+DISPLAY_MAX = 0.93
 
 
 def _scale_confidence(raw_conf: float) -> float:
     """
-    Scale raw model confidence → clinical display range [85%, 88%].
-    Raw range assumed 0.69 – 0.95.
-    Values outside this raw range are clamped.
+    Scale raw model confidence → clinical display range [85%, 93%].
+    Raw range assumed 0.40 – 0.95.
+    Detections below CONF_THRESHOLD (0.69) are already filtered before reaching here.
     """
-    raw_low  = 0.69
+    raw_low  = 0.40
     raw_high = 0.95
     t = (raw_conf - raw_low) / (raw_high - raw_low)
     t = max(0.0, min(1.0, t))
@@ -222,7 +222,7 @@ class DentalDetector:
       1. dental_yolov8.pt (11 classes)
       2. dental_disease_panoramic/best.pt (31 classes)
     TTA is executed on both models. Duplicates are resolved via class-aware NMS.
-    All detections except Milk Tooth / Primary teeth are returned with scaled confidence (85-88%).
+    All detections except Milk Tooth / Primary teeth are returned with scaled confidence (85-93%).
     Detections with raw model confidence below 69% are discarded before enrichment.
     """
 
