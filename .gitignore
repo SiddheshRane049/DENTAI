@@ -25,9 +25,17 @@ build/
 models/
 colab_dataset.zip
 *.zip
+# Ignore images globally except in static folder
 *.bmp
 *.jpg
 *.png
+!static/
+!static/**/*.bmp
+!static/**/*.jpg
+!static/**/*.png
+!static/*.bmp
+!static/*.jpg
+!static/*.png
 
 # Training datasets and runs
 training/augmented_dataset/
