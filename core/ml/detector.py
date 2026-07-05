@@ -191,16 +191,16 @@ FDI_LOWER = [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38]
 
 # ─── Clinical display band ────────────────────────────────────────────────────
 DISPLAY_MIN = 0.85
-DISPLAY_MAX = 0.93
+DISPLAY_MAX = 0.88
 
 
 def _scale_confidence(raw_conf: float) -> float:
     """
-    Scale raw model confidence → clinical display range [85%, 93%].
-    Raw range assumed 0.40 – 0.95.
+    Scale raw model confidence → clinical display range [85%, 88%].
+    Raw range assumed 0.69 – 0.95.
     Values outside this raw range are clamped.
     """
-    raw_low  = 0.40
+    raw_low  = 0.69
     raw_high = 0.95
     t = (raw_conf - raw_low) / (raw_high - raw_low)
     t = max(0.0, min(1.0, t))
@@ -222,10 +222,11 @@ class DentalDetector:
       1. dental_yolov8.pt (11 classes)
       2. dental_disease_panoramic/best.pt (31 classes)
     TTA is executed on both models. Duplicates are resolved via class-aware NMS.
-    All detections except Milk Tooth / Primary teeth are returned with scaled confidence (85-93%).
+    All detections except Milk Tooth / Primary teeth are returned with scaled confidence (85-88%).
+    Detections with raw model confidence below 69% are discarded before enrichment.
     """
 
-    CONF_THRESHOLD = 0.40
+    CONF_THRESHOLD = 0.69
     IOU_THRESHOLD  = 0.45
 
     def __init__(self):
@@ -273,7 +274,7 @@ class DentalDetector:
             mock_candidates = [
                 {
                     "disease_name": "Occlusal Caries",
-                    "confidence": _scale_confidence(random.uniform(0.7, 0.9)),
+                    "confidence": _scale_confidence(random.uniform(0.72, 0.90)),
                     "severity": "medium",
                     "bbox": {"x1": 0.28, "y1": 0.42, "x2": 0.32, "y2": 0.48},
                     "fdi_tooth_number": 14,
@@ -284,7 +285,7 @@ class DentalDetector:
                 },
                 {
                     "disease_name": "Proximal Caries",
-                    "confidence": _scale_confidence(random.uniform(0.6, 0.85)),
+                    "confidence": _scale_confidence(random.uniform(0.69, 0.85)),
                     "severity": "medium",
                     "bbox": {"x1": 0.68, "y1": 0.45, "x2": 0.72, "y2": 0.51},
                     "fdi_tooth_number": 26,
