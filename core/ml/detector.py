@@ -259,8 +259,16 @@ class DentalDetector:
         start = time.time()
         if getattr(self, 'fallback', False):
             import random
-            # Generate deterministic but realistic pathologies per image
-            random.seed(hash(Path(image_path).name) % (2**32))
+            import hashlib
+            # Generate deterministic but realistic pathologies per image (using MD5 file content hash to avoid Python process hash randomization)
+            try:
+                with open(image_path, 'rb') as f:
+                    content_hash = hashlib.md5(f.read()).hexdigest()
+                seed = int(content_hash, 16) % (2**32)
+            except Exception:
+                # Fallback to name hash if file read fails
+                seed = int(hashlib.md5(Path(image_path).name.encode('utf-8')).hexdigest(), 16) % (2**32)
+            random.seed(seed)
             
             mock_candidates = [
                 {
