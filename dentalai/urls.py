@@ -25,7 +25,13 @@ urlpatterns = [
     path('reports/',    TemplateView.as_view(template_name='report.html'),         name='report-page'),
 ]
 
-# Serve media files in development
+# Serve media files in all environments (for serverless/ephemeral /tmp uploads)
+from django.views.static import serve
+from django.urls import re_path
+
+urlpatterns += [
+    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+]
+
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL,  document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])
