@@ -33,8 +33,32 @@
       <div class="doctor-avatar">{{ user.first_name|first|default:'D' }}{{ user.last_name|first|default:'R' }}</div>
       <div>
         <div class="doctor-name">Dr. {{ user.first_name }} {{ user.last_name }}</div>
-        <div class="doctor-role">Dental Surgeon</div>
+        <div class="doctor-role">{{ user.profile.designation|default:'Dental Surgeon' }}</div>
       </div>
     </div>
   </div>
 </aside>
+
+<script>
+/**
+ * DentAI — CSRF Token Utility (Inlined for reliability)
+ */
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+function csrfHeaders(extra) {
+  return Object.assign({ 'X-CSRFToken': getCookie('csrftoken') }, extra || {});
+}
+</script>

@@ -6,7 +6,27 @@ Defines: Patient, Scan, DetectionResult, ScanComparison
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 import uuid
+
+class DoctorProfile(models.Model):
+    """Profile model to store additional information about a Doctor user."""
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    designation = models.CharField(max_length=100, default='Dental Surgeon')
+
+    def __str__(self):
+        return f"{self.user.username} - {self.designation}"
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        DoctorProfile.objects.get_or_create(user=instance)
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    if hasattr(instance, 'profile'):
+        instance.profile.save()
 
 
 class Patient(models.Model):

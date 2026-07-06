@@ -52,6 +52,7 @@ def register_view(request):
         full_name = request.POST.get('full_name', '').strip()
         username = request.POST.get('username', '').strip()
         email = request.POST.get('email', '').strip()
+        designation = request.POST.get('designation', '').strip()
         password = request.POST.get('password', '')
         confirm_password = request.POST.get('confirm_password', '')
 
@@ -79,6 +80,11 @@ def register_view(request):
                 first_name=first_name,
                 last_name=last_name
             )
+
+            # Save doctor profile designation
+            if designation:
+                user.profile.designation = designation
+                user.profile.save()
 
             try:
                 subject = 'Welcome to DentAI!'
