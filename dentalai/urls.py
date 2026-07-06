@@ -31,10 +31,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     # ── Auth ────────────────────────────────────────────────────────────────
-    path('login/',      core_views.login_view,      name='login'),
-    path('register/',   core_views.register_view,   name='register'),
-    path('verify-otp/', core_views.verify_otp_view, name='verify-otp'),
-    path('logout/',     logout_view,                name='logout'),
+    path('login/',      auth_views.LoginView.as_view(template_name='login.html'), name='login'),
+    path('register/',   core_views.register_view,                                 name='register'),
+    path('logout/',     logout_view,                                              name='logout'),
 
     # ── REST API routes ─────────────────────────────────────────────────────
     path('api/', include('core.urls')),
