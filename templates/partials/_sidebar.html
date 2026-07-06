@@ -62,3 +62,52 @@ function csrfHeaders(extra) {
   return Object.assign({ 'X-CSRFToken': getCookie('csrftoken') }, extra || {});
 }
 </script>
+
+<!-- Global Zoom Modal -->
+<div id="global-zoom-modal" style="display: none; position: fixed; z-index: 9999; padding-top: 50px; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(10, 15, 26, 0.95); align-items: center; justify-content: center; cursor: zoom-out;" onclick="closeGlobalZoom()">
+  <span style="position: absolute; top: 20px; right: 35px; color: #f1f1f1; font-size: 40px; font-weight: bold; cursor: pointer; transition: 0.2s;" onmouseover="this.style.color='#ff6b6b'" onmouseout="this.style.color='#f1f1f1'">&times;</span>
+  <img id="global-zoom-img" style="margin: auto; display: block; max-width: 90%; max-height: 85vh; border-radius: 8px; box-shadow: 0 8px 40px rgba(0,0,0,0.5); transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);" src="" alt="Zoomed View" />
+</div>
+
+<style>
+  .xray-viewer img, .xray-preview img, .xray-box img {
+    cursor: zoom-in !important;
+    transition: opacity 0.2s ease-in-out !important;
+  }
+  .xray-viewer img:hover, .xray-preview img:hover, .xray-box img:hover {
+    opacity: 0.92 !important;
+  }
+</style>
+
+<script>
+  function openGlobalZoom(src) {
+    const modal = document.getElementById('global-zoom-modal');
+    const img = document.getElementById('global-zoom-img');
+    if (!modal || !img || !src) return;
+    img.src = src;
+    modal.style.display = 'flex';
+    setTimeout(() => {
+      img.style.transform = 'scale(1)';
+    }, 10);
+  }
+
+  function closeGlobalZoom() {
+    const modal = document.getElementById('global-zoom-modal');
+    const img = document.getElementById('global-zoom-img');
+    if (!modal || !img) return;
+    img.style.transform = 'scale(0.95)';
+    setTimeout(() => {
+      modal.style.display = 'none';
+    }, 150);
+  }
+
+  // Use event delegation to handle dynamically rendered images (like report previews)
+  document.addEventListener('click', function(e) {
+    if (e.target && e.target.tagName === 'IMG') {
+      const parentViewer = e.target.closest('.xray-viewer, .xray-preview, .xray-box');
+      if (parentViewer) {
+        openGlobalZoom(e.target.src);
+      }
+    }
+  });
+</script>
