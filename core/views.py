@@ -552,9 +552,75 @@ def serve_db_media(request, path):
 
     if scan:
         try:
-            if is_annotated and scan.annotated_image_base64:
-                img_data = base64.b64decode(scan.annotated_image_base64)
-                return HttpResponse(img_data, content_type="image/jpeg")
+            if is_annotated:
+                if scan.annotated_image_base64:
+                    img_data = base64.b64decode(scan.annotated_image_base64)
+                    return HttpResponse(img_data, content_type="image/jpeg")
+                elif scan.original_image_base64:
+                    # Dynamic regeneration fallback!
+                    import tempfile
+                    import os
+                    from .ml.landmarks import draw_annotations
+                    
+                    # 1. Write original image to a temp file
+                    orig_bytes = base64.b64decode(scan.original_image_base64)
+                    with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as temp_orig:
+                        temp_orig.write(orig_bytes)
+                        temp_orig_path = temp_orig.name
+                    
+                    # 2. Re-construct detections list from database findings
+                    results = scan.results.all()
+                    detections = []
+                    for r in results:
+                        detections.append({
+                            'disease_name': r.disease_name,
+                            'confidence': r.confidence,
+                            'severity': r.severity,
+                            'bbox': {
+                                'x1': r.bbox_x1, 'y1': r.bbox_y1,
+                                'x2': r.bbox_x2, 'y2': r.bbox_y2,
+                            },
+                            'fdi_tooth_number': r.fdi_tooth_number,
+                            'landmarks': r.landmarks,
+                            'filling_present': r.filling_present,
+                            'crown_present': r.crown_present,
+                            'disease_under_crown': r.disease_under_crown,
+                            'secondary_caries': r.secondary_caries,
+                        })
+                    
+                    # 3. Draw annotations to a temp file
+                    with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as temp_anno:
+                        temp_anno_path = temp_anno.name
+                    
+                    try:
+                        draw_annotations(temp_orig_path, detections, temp_anno_path)
+                        
+                        # 4. Read back the reconstructed image
+                        with open(temp_anno_path, 'rb') as f:
+                            anno_bytes = f.read()
+                        
+                        # 5. Save the base64 data to the database so we don't have to rebuild next time!
+                        scan.annotated_image_base64 = base64.b64encode(anno_bytes).decode('utf-8')
+                        scan.save(update_fields=['annotated_image_base64'])
+                        
+                        # Cleanup temp files
+                        try:
+                            os.unlink(temp_orig_path)
+                        except Exception: pass
+                        try:
+                            os.unlink(temp_anno_path)
+                        except Exception: pass
+                        
+                        return HttpResponse(anno_bytes, content_type="image/jpeg")
+                    except Exception as draw_err:
+                        logger.error(f"Failed to dynamically rebuild annotated image: {draw_err}")
+                        try:
+                            os.unlink(temp_orig_path)
+                        except Exception: pass
+                        try:
+                            os.unlink(temp_anno_path)
+                        except Exception: pass
+            
             elif not is_annotated and scan.original_image_base64:
                 img_data = base64.b64decode(scan.original_image_base64)
                 return HttpResponse(img_data, content_type="image/jpeg")
