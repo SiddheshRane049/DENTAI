@@ -10,6 +10,16 @@ import dj_database_url
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Load local .env file if it exists for local environment testing
+_env_path = BASE_DIR / '.env'
+if _env_path.exists():
+    with open(_env_path, 'r', encoding='utf-8') as _f:
+        for _line in _f:
+            _line = _line.strip()
+            if _line and not _line.startswith('#') and '=' in _line:
+                _k, _v = _line.split('=', 1)
+                os.environ[_k.strip()] = _v.strip()
+
 # SECURITY - Change in production!
 SECRET_KEY = 'django-insecure-dentai-secret-key-change-in-production-2024'
 DEBUG = True
@@ -161,16 +171,17 @@ DENTAL_DISEASE_CLASSES = {
 }
 
 # ─── Email Configuration ──────────────────────────────────────────────────────
-# On Vercel, use standard SMTP configuration; locally, write to console for easy testing.
-if os.environ.get('VERCEL') == '1':
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
-    EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
-    EMAIL_USE_TLS = True
-    EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
-    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
-    DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'DentAI System <no-reply@dentalai.com>')
-else:
+# Uses SMTP if user credentials are provided (on Vercel or locally via .env), otherwise falls back to console.
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'DentAI System <no-reply@dentalai.com>')
+
+if not EMAIL_HOST_USER or not EMAIL_HOST_PASSWORD:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
     DEFAULT_FROM_EMAIL = 'DentAI System <no-reply@dentalai.com>'
+
 
