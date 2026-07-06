@@ -49,9 +49,10 @@ urlpatterns = [
 
 from django.views.static import serve
 from django.urls import re_path
+from core.views import serve_db_media
 
 urlpatterns += [
     re_path(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATICFILES_DIRS[0]}),
-    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+    re_path(r'^media/(?P<path>.*)$', serve_db_media),
 ]
 

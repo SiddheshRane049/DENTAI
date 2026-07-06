@@ -174,12 +174,23 @@ class ScanUploadView(APIView):
         if isinstance(patient, Response):   # Error response
             return patient
 
+        # ── Read and Encode Original Image to Base64 ──────────────────────
+        import base64
+        try:
+            image_file = data['image']
+            image_bytes = image_file.read()
+            image_file.seek(0)
+            orig_b64 = base64.b64encode(image_bytes).decode('utf-8')
+        except Exception:
+            orig_b64 = None
+
         # ── Create Scan record ─────────────────────────────────────────────
         doctor_name_default = f"Dr. {request.user.first_name} {request.user.last_name}"
         scan = Scan.objects.create(
             patient       = patient,
             scan_type     = data['scan_type'],
             original_image= data['image'],
+            original_image_base64= orig_b64,
             doctor_name   = data.get('doctor_name') or doctor_name_default,
             doctor_notes  = data.get('doctor_notes', ''),
             status        = 'processing',
@@ -280,8 +291,16 @@ class ScanUploadView(APIView):
                     secondary_caries    = det.get('secondary_caries', False),
                 )
 
+            # ── Read and Encode Annotated Image to Base64 ────────────────────
+            try:
+                with open(annotated_path, 'rb') as f:
+                    anno_b64 = base64.b64encode(f.read()).decode('utf-8')
+            except Exception:
+                anno_b64 = None
+
             # ── Update scan record ────────────────────────────────────────
             scan.annotated_image  = annotated_name
+            scan.annotated_image_base64 = anno_b64
             scan.inference_time_ms= result['inference_time_ms']
             scan.model_version    = result['model_version']
             scan.status           = 'completed'
@@ -500,4 +519,50 @@ class ReportDownloadView(APIView):
         )
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
         return response
+
+
+def serve_db_media(request, path):
+    """
+    Serves uploaded/annotated scan images directly from the database if they are
+    missing from local ephemeral serverless disk storage (/tmp/media).
+    """
+    import base64
+    from django.http import HttpResponse, Http404
+    from django.views.static import serve
+    from django.conf import settings
+    from .models import Scan
+
+    normalized_path = path.replace('\\', '/')
+    scan = None
+    is_annotated = False
+
+    if normalized_path.startswith('annotated/'):
+        is_annotated = True
+        filename = normalized_path.split('/')[-1]
+        try:
+            scan = Scan.objects.filter(annotated_image__icontains=filename).first()
+        except Exception:
+            pass
+    elif normalized_path.startswith('scans/'):
+        filename = normalized_path.split('/')[-1]
+        try:
+            scan = Scan.objects.filter(original_image__icontains=filename).first()
+        except Exception:
+            pass
+
+    if scan:
+        try:
+            if is_annotated and scan.annotated_image_base64:
+                img_data = base64.b64decode(scan.annotated_image_base64)
+                return HttpResponse(img_data, content_type="image/jpeg")
+            elif not is_annotated and scan.original_image_base64:
+                img_data = base64.b64decode(scan.original_image_base64)
+                return HttpResponse(img_data, content_type="image/jpeg")
+        except Exception as e:
+            logger.error(f"Failed to serve image from DB: {e}")
+
+    try:
+        return serve(request, path, document_root=settings.MEDIA_ROOT)
+    except Http404:
+        raise Http404("Image not found on disk or database.")
 

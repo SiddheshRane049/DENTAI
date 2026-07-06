@@ -114,6 +114,11 @@ class Scan(models.Model):
     scan_type        = models.CharField(max_length=4, choices=SCAN_TYPE_CHOICES)
     original_image   = models.ImageField(upload_to=scan_image_upload_path)
     annotated_image  = models.ImageField(upload_to=annotated_image_upload_path, blank=True, null=True)
+    
+    # DB-backed image persistence for serverless environments (Vercel)
+    original_image_base64  = models.TextField(blank=True, null=True)
+    annotated_image_base64 = models.TextField(blank=True, null=True)
+    
     status           = models.CharField(max_length=12, choices=STATUS_CHOICES, default='pending', db_index=True)
 
     # Inference metadata
