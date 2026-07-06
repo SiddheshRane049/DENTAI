@@ -20,10 +20,10 @@ if _env_path.exists():
                 _k, _v = _line.split('=', 1)
                 os.environ[_k.strip()] = _v.strip()
 
-# SECURITY - Change in production!
-SECRET_KEY = 'django-insecure-dentai-secret-key-change-in-production-2024'
-DEBUG = True
-ALLOWED_HOSTS = ['*']
+# SECURITY
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-dentai-secret-key-change-in-production-2024')
+DEBUG = os.environ.get('DEBUG', 'False').lower() in ('true', '1', 'yes')
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
 
 # ─── Installed Applications ───────────────────────────────────────────────────
 INSTALLED_APPS = [
@@ -51,6 +51,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.gzip.GZipMiddleware',
+    'django.middleware.http.ConditionalGetMiddleware',
 ]
 
 ROOT_URLCONF = 'dentalai.urls'
@@ -124,8 +126,13 @@ else:
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # ─── CORS Configuration ───────────────────────────────────────────────────────
-CORS_ALLOW_ALL_ORIGINS = True       # Tighten in production
+CORS_ALLOW_ALL_ORIGINS = DEBUG  # Only allow all origins in development
 CORS_ALLOW_CREDENTIALS = True
+if not DEBUG:
+    CORS_ALLOWED_ORIGINS = [
+        origin.strip() for origin in
+        os.environ.get('CORS_ALLOWED_ORIGINS', 'https://dentai.vercel.app').split(',')
+    ]
 
 # ─── Django REST Framework ────────────────────────────────────────────────────
 REST_FRAMEWORK = {
@@ -138,7 +145,7 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'core.auth.CsrfExemptSessionAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
@@ -184,4 +191,18 @@ if not EMAIL_HOST_USER or not EMAIL_HOST_PASSWORD:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
     DEFAULT_FROM_EMAIL = 'DentAI System <no-reply@dentalai.com>'
 
+# ─── Production Security Headers ──────────────────────────────────────────────
+if not DEBUG:
+    SECURE_SSL_REDIRECT = not os.environ.get('VERCEL')  # Vercel handles SSL itself
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    CSRF_TRUSTED_ORIGINS = [
+        origin.strip() for origin in
+        os.environ.get('CSRF_TRUSTED_ORIGINS', 'https://dentai.vercel.app').split(',')
+    ]
 

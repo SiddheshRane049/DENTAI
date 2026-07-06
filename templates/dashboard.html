@@ -1,9 +1,11 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DentAI — Dashboard</title>
+  <link rel="icon" type="image/png" href="{% static 'logo.png' %}" />
   <meta name="description" content="DentAI Dental Disease Detection System — Radiologist Dashboard" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -438,27 +440,9 @@
   </style>
 </head>
 <body>
+  {% csrf_token %}
 
-  <!-- ── Sidebar Navigation ──────────────────────────────────────── -->
-  <aside class="sidebar">
-    <div class="sidebar-logo">
-      <div class="logo-mark">
-        <img src="/static/logo.png" alt="DentAI Logo" style="height: 38px; width: auto; display: block; object-fit: contain;">
-      </div>
-    </div>
-
-    <nav class="sidebar-nav">
-      <div class="nav-section-label">Main</div>
-      <a href="/dashboard/" class="nav-item active" id="nav-dashboard"><span class="material-icons-round">dashboard</span> Dashboard</a>
-      <a href="/upload/" class="nav-item" id="nav-upload"><span class="material-icons-round">add_circle_outline</span> New Scan</a>
-      <div class="nav-section-label">Clinical</div>
-      <a href="/results/" class="nav-item" id="nav-results"><span class="material-icons-round">biotech</span> Results</a>
-      <a href="/history/" class="nav-item" id="nav-history"><span class="material-icons-round">manage_history</span> Patient History</a>
-      <a href="/reports/" class="nav-item" id="nav-reports"><span class="material-icons-round">description</span> Reports</a>
-    </nav>
-
-
-  </aside>
+  {% include 'partials/_sidebar.html' with active_page='dashboard' %}
 
   <!-- ── Main Content ────────────────────────────────────────────── -->
   <main class="main">
@@ -614,11 +598,12 @@
       } catch (err) {
         document.getElementById('scans-loading').innerHTML =
           `<div style="color:var(--coral)">⚠️ Could not load dashboard data. Is the Django server running?</div>`;
-        console.error('Dashboard load error:', err);
+        /* silenced for production */
       }
     }
 
     loadDashboard();
   </script>
+  <script src="{% static 'js/csrf.js' %}"></script>
 </body>
 </html>

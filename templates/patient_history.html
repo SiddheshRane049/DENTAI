@@ -1,9 +1,11 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DentAI — Patient History</title>
+  <link rel="icon" type="image/png" href="{% static 'logo.png' %}" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:wght@400;600;700&display=swap" rel="stylesheet" />
@@ -93,23 +95,9 @@
   </style>
 </head>
 <body>
-  <aside class="sidebar">
-    <div class="sidebar-logo">
-      <div class="logo-mark">
-        <img src="/static/logo.png" alt="DentAI Logo" style="height: 38px; width: auto; display: block; object-fit: contain;">
-      </div>
-    </div>
-    <nav class="sidebar-nav">
-      <div class="nav-section-label">Main</div>
-      <a href="/dashboard/" class="nav-item"><span class="material-icons-round">dashboard</span> Dashboard</a>
-      <a href="/upload/" class="nav-item"><span class="material-icons-round">add_circle_outline</span> New Scan</a>
-      <div class="nav-section-label">Clinical</div>
-      <a href="/results/" class="nav-item"><span class="material-icons-round">biotech</span> Results</a>
-      <a href="/history/" class="nav-item active"><span class="material-icons-round">manage_history</span> Patient History</a>
-      <a href="/reports/" class="nav-item"><span class="material-icons-round">description</span> Reports</a>
-    </nav>
+  {% csrf_token %}
 
-  </aside>
+  {% include 'partials/_sidebar.html' with active_page='history' %}
 
   <main class="main">
     <div class="page-header">
@@ -277,5 +265,6 @@
 
     loadHistory();
   </script>
+  <script src="{% static 'js/csrf.js' %}"></script>
 </body>
 </html>

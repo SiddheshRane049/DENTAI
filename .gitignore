@@ -53,3 +53,6 @@ training/runs/
 *.njsproj
 *.sln
 *.swp
+
+# Scratch files
+scratch/

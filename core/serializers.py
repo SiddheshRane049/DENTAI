@@ -69,8 +69,8 @@ class ScanSerializer(serializers.ModelSerializer):
 class ScanListSerializer(serializers.ModelSerializer):
     """Lightweight scan data for list/table views (no nested results)."""
 
-    disease_count    = serializers.ReadOnlyField()
-    highest_severity = serializers.ReadOnlyField()
+    disease_count    = serializers.SerializerMethodField()
+    highest_severity = serializers.SerializerMethodField()
     patient_name     = serializers.SerializerMethodField()
     patient_id_code  = serializers.SerializerMethodField()
 
@@ -87,6 +87,16 @@ class ScanListSerializer(serializers.ModelSerializer):
 
     def get_patient_id_code(self, obj):
         return obj.patient.patient_id
+
+    def get_disease_count(self, obj):
+        if hasattr(obj, '_disease_count'):
+            return obj._disease_count
+        return obj.results.exclude(disease_name='Healthy').count()
+
+    def get_highest_severity(self, obj):
+        if hasattr(obj, '_highest_severity'):
+            return obj._highest_severity
+        return obj.highest_severity
 
 
 class PatientSerializer(serializers.ModelSerializer):
@@ -106,9 +116,14 @@ class PatientSerializer(serializers.ModelSerializer):
         read_only_fields = ['patient_id']
 
     def get_scan_count(self, obj):
+        # Use annotated value if available, fallback to query
+        if hasattr(obj, '_scan_count'):
+            return obj._scan_count
         return obj.scans.count()
 
     def get_last_scan_at(self, obj):
+        if hasattr(obj, '_last_scan_at'):
+            return obj._last_scan_at
         last = obj.scans.first()
         return last.created_at if last else None
 

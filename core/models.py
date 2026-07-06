@@ -38,11 +38,17 @@ class Patient(models.Model):
     def save(self, *args, **kwargs):
         """Auto-generate patient_id before first save."""
         if not self.patient_id:
+            from django.db.models import Max
             year = timezone.now().year
-            count = Patient.objects.filter(
-                created_at__year=year
-            ).count() + 1
-            self.patient_id = f"PT-{year}-{count:04d}"
+            prefix = f"PT-{year}-"
+            last = Patient.objects.filter(
+                patient_id__startswith=prefix
+            ).aggregate(max_id=Max('patient_id'))['max_id']
+            if last:
+                seq = int(last.split('-')[-1]) + 1
+            else:
+                seq = 1
+            self.patient_id = f"{prefix}{seq:04d}"
         super().save(*args, **kwargs)
 
     @property
@@ -88,7 +94,7 @@ class Scan(models.Model):
     scan_type        = models.CharField(max_length=4, choices=SCAN_TYPE_CHOICES)
     original_image   = models.ImageField(upload_to=scan_image_upload_path)
     annotated_image  = models.ImageField(upload_to=annotated_image_upload_path, blank=True, null=True)
-    status           = models.CharField(max_length=12, choices=STATUS_CHOICES, default='pending')
+    status           = models.CharField(max_length=12, choices=STATUS_CHOICES, default='pending', db_index=True)
 
     # Inference metadata
     inference_time_ms = models.FloatField(null=True, blank=True, help_text="Model inference time in milliseconds")
@@ -97,7 +103,7 @@ class Scan(models.Model):
     doctor_notes      = models.TextField(blank=True, null=True)
     report_pdf        = models.FileField(upload_to='reports/', blank=True, null=True)
 
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -111,15 +117,17 @@ class Scan(models.Model):
     @property
     def disease_count(self):
         """Count of detected diseases (excluding 'Healthy' findings)."""
-        return self.results.exclude(disease_name='Healthy').count()
+        # Compute in-memory if results are prefetched to avoid N+1 queries
+        return sum(1 for r in self.results.all() if r.disease_name != 'Healthy')
 
     @property
     def highest_severity(self):
         """Returns the highest severity found across all results."""
-        results = self.results.all()
-        if results.filter(severity='high').exists():
+        # Compute in-memory if results are prefetched to avoid N+1 queries
+        severities = [r.severity for r in self.results.all()]
+        if 'high' in severities:
             return 'high'
-        if results.filter(severity='medium').exists():
+        if 'medium' in severities:
             return 'medium'
         return 'low'
 
@@ -136,7 +144,7 @@ class DetectionResult(models.Model):
     scan            = models.ForeignKey(Scan, on_delete=models.CASCADE, related_name='results')
     disease_name    = models.CharField(max_length=100)
     confidence      = models.FloatField(help_text="Confidence score 0.0 to 1.0")
-    severity        = models.CharField(max_length=6, choices=SEVERITY_CHOICES, default='low')
+    severity        = models.CharField(max_length=6, choices=SEVERITY_CHOICES, default='low', db_index=True)
 
     # Bounding box coordinates (normalized 0-1)
     bbox_x1 = models.FloatField(default=0)

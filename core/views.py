@@ -37,8 +37,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
-import random
-import time
+
 
 logger = logging.getLogger(__name__)
 
@@ -110,15 +109,25 @@ class DashboardView(APIView):
         patients_qs = Patient.objects.filter(doctor=request.user)
         scans_qs = Scan.objects.filter(patient__doctor=request.user)
 
+        from django.db.models import Count, Q
+
+        scan_agg = scans_qs.aggregate(
+            total=Count('id'),
+            today=Count('id', filter=Q(created_at__date=today)),
+            this_month=Count('id', filter=Q(created_at__date__gte=month_start)),
+            pending=Count('id', filter=Q(status='pending')),
+            high_sev=Count('id', filter=Q(results__severity='high'), distinct=True),
+        )
+
         stats = {
             'total_patients':   patients_qs.count(),
-            'total_scans':      scans_qs.count(),
-            'scans_today':      scans_qs.filter(created_at__date=today).count(),
-            'scans_this_month': scans_qs.filter(created_at__date__gte=month_start).count(),
-            'pending_scans':    scans_qs.filter(status='pending').count(),
-            'high_severity':    scans_qs.filter(results__severity='high').distinct().count(),
+            'total_scans':      scan_agg['total'],
+            'scans_today':      scan_agg['today'],
+            'scans_this_month': scan_agg['this_month'],
+            'pending_scans':    scan_agg['pending'],
+            'high_severity':    scan_agg['high_sev'],
             'recent_scans': ScanListSerializer(
-                scans_qs.select_related('patient').order_by('-created_at')[:8],
+                scans_qs.select_related('patient').prefetch_related('results').order_by('-created_at')[:8],
                 many=True,
                 context={'request': request},
             ).data,
@@ -379,7 +388,11 @@ class PatientListCreateView(generics.ListCreateAPIView):
     serializer_class = PatientSerializer
 
     def get_queryset(self):
-        return Patient.objects.filter(doctor=self.request.user).order_by('-created_at')
+        from django.db.models import Count, Max
+        return Patient.objects.filter(doctor=self.request.user).annotate(
+            _scan_count=Count('scans'),
+            _last_scan_at=Max('scans__created_at'),
+        ).order_by('-created_at')
 
     def perform_create(self, serializer):
         serializer.save(doctor=self.request.user)

@@ -1,9 +1,11 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DentAI — Upload Scan</title>
+  <link rel="icon" type="image/png" href="{% static 'logo.png' %}" />
   <meta name="description" content="Upload a dental X-ray for AI-powered disease detection" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -110,23 +112,9 @@
   </style>
 </head>
 <body>
-  <aside class="sidebar">
-    <div class="sidebar-logo">
-      <div class="logo-mark">
-        <img src="/static/logo.png" alt="DentAI Logo" style="height: 38px; width: auto; display: block; object-fit: contain;">
-      </div>
-    </div>
-    <nav class="sidebar-nav">
-      <div class="nav-section-label">Main</div>
-      <a href="/dashboard/" class="nav-item"><span class="material-icons-round">dashboard</span> Dashboard</a>
-      <a href="/upload/" class="nav-item active"><span class="material-icons-round">add_circle_outline</span> New Scan</a>
-      <div class="nav-section-label">Clinical</div>
-      <a href="/results/" class="nav-item"><span class="material-icons-round">biotech</span> Results</a>
-      <a href="/history/" class="nav-item"><span class="material-icons-round">manage_history</span> Patient History</a>
-      <a href="/reports/" class="nav-item"><span class="material-icons-round">description</span> Reports</a>
-    </nav>
+  {% csrf_token %}
 
-  </aside>
+  {% include 'partials/_sidebar.html' with active_page='upload' %}
 
   <main class="main">
     <div class="page-header">
@@ -360,7 +348,7 @@
       showMsg('info', 'Uploading X-ray and running AI detection... this may take 30–60 seconds.');
 
       try {
-        const res  = await fetch(`${API}/scans/upload/`, { method: 'POST', body: formData });
+        const res  = await fetch(`${API}/scans/upload/`, { method: 'POST', headers: csrfHeaders(), body: formData });
         const data = await res.json();
 
         if (!res.ok) throw new Error(data.error || JSON.stringify(data));
@@ -393,12 +381,13 @@
             btn.innerHTML = '<span class="material-icons-round">send</span> Run AI Detection';
             return;
           }
-        } catch(e) {}
+        } catch(e) { console.warn('Request failed:', e); }
       }
       showMsg('error', 'Detection is taking too long. Please check the results page manually.');
       btn.disabled = false;
       btn.innerHTML = '<span class="material-icons-round">send</span> Run AI Detection';
     }
   </script>
+  <script src="{% static 'js/csrf.js' %}"></script>
 </body>
 </html>

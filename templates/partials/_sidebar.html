@@ -1,0 +1,40 @@
+{% load static %}
+<!-- ─── Sidebar ─────────────────────────────────────────────── -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <img src="{% static 'logo.png' %}" alt="DentAI Logo" style="height: 38px; width: auto; display: block; object-fit: contain;">
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Main</div>
+    <a class="nav-item{% if active_page == 'dashboard' %} active{% endif %}" id="nav-dashboard" href="/dashboard/">
+      <span class="material-icons-round">dashboard</span> Dashboard
+    </a>
+    <a class="nav-item{% if active_page == 'upload' %} active{% endif %}" id="nav-upload" href="/upload/">
+      <span class="material-icons-round">add_circle_outline</span> New Scan
+    </a>
+
+    <div class="nav-section-label">Clinical</div>
+    <a class="nav-item{% if active_page == 'results' %} active{% endif %}" id="nav-results" href="/results/">
+      <span class="material-icons-round">biotech</span> Results
+    </a>
+    <a class="nav-item{% if active_page == 'history' %} active{% endif %}" id="nav-history" href="/history/">
+      <span class="material-icons-round">manage_history</span> Patient History
+    </a>
+    <a class="nav-item{% if active_page == 'reports' %} active{% endif %}" id="nav-reports" href="/reports/">
+      <span class="material-icons-round">description</span> Reports
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="doctor-card">
+      <div class="doctor-avatar">{{ user.first_name|first|default:'D' }}{{ user.last_name|first|default:'R' }}</div>
+      <div>
+        <div class="doctor-name">Dr. {{ user.first_name }} {{ user.last_name }}</div>
+        <div class="doctor-role">Dental Surgeon</div>
+      </div>
+    </div>
+  </div>
+</aside>
