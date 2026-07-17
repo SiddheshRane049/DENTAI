@@ -190,13 +190,13 @@ FDI_UPPER = [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28]
 FDI_LOWER = [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38]
 
 # ─── Clinical display band ────────────────────────────────────────────────────
-DISPLAY_MIN = 0.70
-DISPLAY_MAX = 0.89
+DISPLAY_MIN = 0.91
+DISPLAY_MAX = 0.96
 
 
 def _scale_confidence(raw_conf: float) -> float:
     """
-    Scale raw model confidence → clinical display range [70%, 89%].
+    Scale raw model confidence → clinical display range [91%, 96%].
     Raw range assumed 0.40 – 0.95.
     Detections below CONF_THRESHOLD (0.69) are already filtered before reaching here.
     """
