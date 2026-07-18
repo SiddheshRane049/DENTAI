@@ -14,6 +14,7 @@ from .views import (
     PatientScanHistoryView,
     ReportGenerateView,
     ReportDownloadView,
+    DetectionResultDetailView,
 )
 
 urlpatterns = [
@@ -25,6 +26,9 @@ urlpatterns = [
     path('scans/',                                  ScanListView.as_view(),            name='api-scan-list'),
     path('scans/<str:pk>/',                         ScanDetailView.as_view(),          name='api-scan-detail'),
     path('scans/<str:pk>/status/',                  ScanStatusView.as_view(),          name='api-scan-status'),
+
+    # ── Detections ────────────────────────────────────────────────────
+    path('detections/<int:pk>/',                    DetectionResultDetailView.as_view(),name='api-detection-detail'),
 
     # ── Reports ───────────────────────────────────────────────────────
     path('scans/<str:pk>/report/',                  ReportGenerateView.as_view(),      name='api-report-generate'),

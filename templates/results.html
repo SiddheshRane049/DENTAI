@@ -238,7 +238,7 @@
           `<span class="badge ${scan.scan_type==='OPG'?'badge-opg':'badge-iopa'}">${scan.scan_type}</span>`;
 
         // X-rays
-        if (scan.annotated_image_url) document.getElementById('xray-annotated').src = scan.annotated_image_url;
+        if (scan.annotated_image_url) document.getElementById('xray-annotated').src = scan.annotated_image_url + '?t=' + new Date().getTime();
         if (scan.original_image_url)  document.getElementById('xray-original').src  = scan.original_image_url;
 
         // Meta pills
@@ -282,10 +282,15 @@
             `<div style="text-align:center;padding:32px;color:var(--green);font-weight:600">✅ No diseases detected — healthy scan</div>`;
         } else {
           document.getElementById('detection-list').innerHTML = results.map(r => `
-            <div class="detection-item">
+            <div class="detection-item" id="det-item-${r.id}">
               <div class="det-top">
                 <div class="det-name">${r.disease_name}</div>
-                <div class="det-conf">${r.confidence_percent}%</div>
+                <div style="display:flex;align-items:center;gap:10px">
+                  <div class="det-conf">${r.confidence_percent}%</div>
+                  <button onclick="deleteDetection(${r.id})" title="Delete Finding" style="background:none;border:none;cursor:pointer;color:var(--text-muted);display:flex;align-items:center;padding:2px;border-radius:4px;transition:all 0.2s;" onmouseover="this.style.color='var(--red)';this.style.background='var(--coral-light)'" onmouseout="this.style.color='var(--text-muted)';this.style.background='none'">
+                    <span class="material-icons-round" style="font-size:17px">delete_outline</span>
+                  </button>
+                </div>
               </div>
               <div class="conf-bar-wrap"><div class="conf-bar" style="width:${r.confidence_percent}%"></div></div>
               <div class="det-meta">
@@ -313,6 +318,27 @@
       } catch (err) {
         document.getElementById('loading-state').innerHTML =
           `<div style="color:var(--red)">❌ ${err.message}</div>`;
+      }
+    }
+
+    async function deleteDetection(detectionId) {
+      if (!confirm("Are you sure you want to remove this diagnostic finding? This will update the report and X-ray annotations in real-time.")) {
+        return;
+      }
+      try {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const res = await fetch(`/api/detections/${detectionId}/`, {
+          method: 'DELETE',
+          headers: {
+            'X-CSRFToken': csrfToken,
+          }
+        });
+        if (!res.ok) throw new Error('Failed to delete detection');
+        
+        // Reload all data so that summary stats, annotated image, and lists are cleanly updated
+        await loadResults();
+      } catch (err) {
+        alert("Error: " + err.message);
       }
     }
 

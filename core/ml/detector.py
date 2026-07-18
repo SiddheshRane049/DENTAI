@@ -226,7 +226,7 @@ class DentalDetector:
     Detections with raw model confidence below 69% are discarded before enrichment.
     """
 
-    CONF_THRESHOLD = 0.69
+    CONF_THRESHOLD = 0.72
     IOU_THRESHOLD  = 0.45
 
     def __init__(self):
@@ -417,11 +417,48 @@ class DentalDetector:
 
     def _apply_nms(self, raw: list) -> list:
         from collections import defaultdict
-        per_class = defaultdict(list)
+        
+        # Group by super-class to perform cross-model fusion and deduplicate overlapping boxes
+        SUPER_CLASSES = {
+            # Caries
+            "Occlusal Caries": "caries",
+            "Proximal Caries": "caries",
+            "Caries": "caries",
+            
+            # Periapical / Abscess
+            "Periapical Abscess": "periapical",
+            "Periapical Cyst": "periapical",
+            "Granuloma": "periapical",
+            "Apical Periodontitis": "periapical",
+            "Periapical Lesion": "periapical",
+            "Cyst": "periapical",
+            
+            # Bone Loss
+            "Horizontal Bone Loss": "boneloss",
+            "Vertical Bone Loss": "boneloss",
+            "Bone Loss": "boneloss",
+            
+            # Impacted
+            "Impacted Tooth": "impacted",
+            "impacted tooth": "impacted",
+            
+            # Retained Root
+            "Retained Root": "root",
+            "Root Piece": "root",
+        }
+        
+        per_group = defaultdict(list)
         for d in raw:
-            per_class[(d["model_id"], d["cls_id"])].append(d)
+            if d["model_id"] == 1:
+                name = ALL_CLASSES_M1.get(d["cls_id"], "")
+            else:
+                name = ALL_CLASSES_M2.get(d["cls_id"], "")
+                
+            group = SUPER_CLASSES.get(name, f"model_{d['model_id']}_cls_{d['cls_id']}")
+            per_group[group].append(d)
+            
         final = []
-        for key, boxes in per_class.items():
+        for key, boxes in per_group.items():
             final.extend(self._nms_class(boxes))
         return final
 

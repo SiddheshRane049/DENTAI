@@ -632,3 +632,43 @@ def serve_db_media(request, path):
     except Http404:
         raise Http404("Image not found on disk or database.")
 
+
+class DetectionResultDetailView(generics.DestroyAPIView, generics.UpdateAPIView):
+    """
+    DELETE /api/detections/<id>/  → Delete a detection finding
+    PATCH  /api/detections/<id>/  → Update a detection finding
+    """
+    queryset = DetectionResult.objects.all()
+    
+    def get_serializer_class(self):
+        from .serializers import DetectionResultSerializer
+        return DetectionResultSerializer
+        
+    def perform_destroy(self, instance):
+        scan = instance.scan
+        # 1. Delete annotated image file from disk to force rebuild
+        if scan.annotated_image:
+            try:
+                os.remove(scan.annotated_image.path)
+            except Exception:
+                pass
+        # 2. Clear cached base64
+        scan.annotated_image_base64 = None
+        scan.save()
+        
+        # 3. Delete the result
+        instance.delete()
+        
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        scan = instance.scan
+        # 1. Delete annotated image file from disk to force rebuild
+        if scan.annotated_image:
+            try:
+                os.remove(scan.annotated_image.path)
+            except Exception:
+                pass
+        # 2. Clear cached base64
+        scan.annotated_image_base64 = None
+        scan.save()
+
