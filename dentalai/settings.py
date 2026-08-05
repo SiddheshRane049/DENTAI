@@ -22,7 +22,7 @@ if _env_path.exists():
 
 # SECURITY
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-dentai-secret-key-change-in-production-2024')
-DEBUG = os.environ.get('DEBUG', 'False').lower() in ('true', '1', 'yes')
+DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes')
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
 
 # ─── Installed Applications ───────────────────────────────────────────────────
@@ -156,11 +156,11 @@ REST_FRAMEWORK = {
 }
 
 # ─── ML Model Configuration ───────────────────────────────────────────────────
-# Path to the YOLOv8 weights file (fine-tuned on dental dataset)
-# Place your trained model at: models/dental_yolov8.pt
-# If not available, the app falls back to YOLOv8 nano pretrained (for demo)
-YOLO_MODEL_PATH = BASE_DIR / 'models' / 'dental_yolov8.pt'
-YOLO_CONFIDENCE_THRESHOLD = 0.25   # Minimum confidence for detections
+USE_NEW_MODEL_ONLY = False          # Run concurrent multi-model inference
+ENABLE_SIMULTANEOUS_MODELS = True  # Enable concurrent execution of all active YOLO models
+YOLO_MODEL_PATH = BASE_DIR / 'models' / 'runs_dentai_weights_best.pt'
+YOLO_FINAL_MODEL_PATH = BASE_DIR / 'models' / 'DentAI_Final.pt'
+YOLO_CONFIDENCE_THRESHOLD = 0.38   # Minimum confidence for high-accuracy detections
 
 # ─── Dental Disease Classes (FDI + Disease Mapping) ──────────────────────────
 DENTAL_DISEASE_CLASSES = {
@@ -172,7 +172,7 @@ DENTAL_DISEASE_CLASSES = {
     5:  {'name': 'Apical Periodontitis',      'severity': 'medium', 'color': (200, 80,  0)},
     6:  {'name': 'Horizontal Bone Loss',      'severity': 'high',   'color': (150, 0,  150)},
     7:  {'name': 'Vertical Bone Loss',        'severity': 'high',   'color': (130, 0,  200)},
-    8:  {'name': 'Root Canal Required',       'severity': 'high',   'color': (200, 0,   50)},
+    8:  {'name': 'Root Canal Treated',        'severity': 'low',    'color': (200, 0,   50)},
     9:  {'name': 'Milk Tooth',                'severity': 'low',    'color': (0,  180, 100)},
     10: {'name': 'Healthy',                   'severity': 'low',    'color': (0,  200,   0)},
 }
@@ -192,8 +192,8 @@ if not EMAIL_HOST_USER or not EMAIL_HOST_PASSWORD:
     DEFAULT_FROM_EMAIL = 'DentAI System <no-reply@dentalai.com>'
 
 # ─── Production Security Headers ──────────────────────────────────────────────
-if not DEBUG:
-    SECURE_SSL_REDIRECT = not os.environ.get('VERCEL')  # Vercel handles SSL itself
+if not DEBUG and os.environ.get('VERCEL'):
+    SECURE_SSL_REDIRECT = False  # Vercel edge handles SSL redirection
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
@@ -201,6 +201,11 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = True
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
+else:
+    SECURE_SSL_REDIRECT = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+
     CSRF_TRUSTED_ORIGINS = [
         origin.strip() for origin in
         os.environ.get('CSRF_TRUSTED_ORIGINS', 'https://dentai.vercel.app').split(',')

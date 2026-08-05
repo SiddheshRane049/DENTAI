@@ -308,7 +308,7 @@
           results.some(r=>r.disease_name.includes('Caries')) ? '🦷 Schedule restorative treatment for cavity findings.' : '',
           results.some(r=>r.disease_name.includes('Abscess')||r.disease_name.includes('Cyst')) ? '💊 Consider antibiotic therapy and further imaging.' : '',
           results.some(r=>r.disease_name.includes('Bone Loss')) ? '🦴 Periodontal assessment and treatment planning recommended.' : '',
-          results.some(r=>r.disease_name.includes('Root Canal')) ? '🔬 Root canal treatment evaluation required.' : '',
+          results.some(r=>r.disease_name.includes('Root Canal')) ? '🔬 Existing root canal detected. Monitor for post-treatment stability.' : '',
           results.length === 0 ? '✅ No pathological findings. Schedule routine follow-up in 6 months.' : '',
         ].filter(Boolean).map(s=>`<div style="margin-bottom:8px">${s}</div>`).join('');
 

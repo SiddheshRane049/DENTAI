@@ -366,7 +366,7 @@ def _build_recommendations(scan, styles):
         'Apical Periodontitis': 'Root canal therapy recommended. Assess restorability of tooth.',
         'Horizontal Bone Loss': 'Periodontal treatment and scaling/root planing required. Refer to periodontist.',
         'Vertical Bone Loss': 'Surgical periodontal intervention likely needed. Immediate consultation.',
-        'Root Canal Required': '⚠️ HIGH PRIORITY: Initiate root canal treatment to prevent further infection.',
+        'Root Canal Treated': 'Existing root canal treatment noted. Monitor for long-term stability.',
         'Milk Tooth': 'Monitor for natural exfoliation. Do not extract prematurely unless indicated.',
         'Healthy': 'No immediate intervention required. Routine 6-month follow-up.'
     }

@@ -4,7 +4,7 @@ DentAI — Dual-Model Clinical YOLO Detector (11-Class + 31-Class)
 Model 1 (dental_yolov8.pt):
   0: Occlusal Caries, 1: Proximal Caries, 2: Periapical Abscess, 3: Periapical Cyst,
   4: Granuloma, 5: Apical Periodontitis, 6: Horizontal Bone Loss, 7: Vertical Bone Loss,
-  8: Root Canal Required, 9: Milk Tooth (skipped), 10: Healthy
+  8: Root Canal Treated, 9: Milk Tooth (skipped), 10: Healthy
 
 Model 2 (dental_disease_panoramic/best.pt):
   0: Caries, 1: Crown, 2: Filling, 3: Implant, 4: Malaligned, 5: Mandibular Canal,
@@ -42,12 +42,12 @@ ALL_CLASSES_M1 = {
     5:  "Apical Periodontitis",
     6:  "Horizontal Bone Loss",
     7:  "Vertical Bone Loss",
-    8:  "Root Canal Required",
+    8:  "Root Canal Treated",
     9:  "Milk Tooth",
     10: "Healthy",
 }
 
-PATHOLOGY_IDS_M1 = {0, 1, 2, 3, 4, 5, 6, 7, 8}
+PATHOLOGY_IDS_M1 = {0, 1, 2, 3, 4, 5, 6, 7}
 
 # ─── Model 2 (31 classes) ─────────────────────────────────────────────────────
 ALL_CLASSES_M2 = {
@@ -89,6 +89,23 @@ RESTORATION_IDS_M2 = {1, 2, 3, 9}
 STRUCTURAL_IDS_M2 = {4, 5, 6, 11, 12, 15, 16}
 HARDWARE_IDS_M2 = {17, 18, 21, 22, 23, 24, 25, 26, 27}
 
+# ─── Model 3 (DentAI_Final.pt - 9 classes) ──────────────────────────────────
+ALL_CLASSES_M3 = {
+    0: "Bone Loss",
+    1: "Crown",
+    2: "Filling",
+    3: "Missing Teeth",
+    4: "Periapical Lesion",
+    5: "Primary Teeth",
+    6: "Retained Root",
+    7: "Root Piece",
+    8: "Impacted Tooth",
+}
+
+PATHOLOGY_IDS_M3 = {0, 4, 6, 7}
+RESTORATION_IDS_M3 = {1, 2}
+STRUCTURAL_IDS_M3 = {3, 5, 8}
+
 # ─── Unified Severity and Color Definitions ──────────────────────────────────
 SEVERITY_MAP = {
     # Model 1
@@ -100,13 +117,15 @@ SEVERITY_MAP = {
     "Apical Periodontitis": "high",
     "Horizontal Bone Loss": "medium",
     "Vertical Bone Loss":   "high",
-    "Root Canal Required":  "high",
+    "Root Canal Treated":   "low",
     "Milk Tooth":           "low",
     "Healthy":              "low",
 
-    # Model 2
+    # Model 2 & Model 3
     "Caries":               "medium",
+    "Crown":                "low",
     "Dental Crown":         "low",
+    "Filling":              "low",
     "Dental Filling":       "low",
     "Dental Implant":       "low",
     "Malaligned Tooth":     "low",
@@ -136,6 +155,7 @@ SEVERITY_MAP = {
     "Cyst":                 "high",
     "Root Resorption":      "medium",
     "Primary teeth":        "low",
+    "Primary Teeth":        "low",
 }
 
 CLASS_COLORS_RGB = {
@@ -148,13 +168,15 @@ CLASS_COLORS_RGB = {
     "Apical Periodontitis": (220, 100,  30),   # Orange
     "Horizontal Bone Loss": (220, 140,  30),   # Amber
     "Vertical Bone Loss":   (220, 140,  30),   # Amber
-    "Root Canal Required":  (180,  30, 180),   # Purple
+    "Root Canal Treated":   (180,  30, 180),   # Purple
     "Milk Tooth":           ( 60, 160, 220),   # Blue
     "Healthy":              ( 60, 200,  60),   # Green
 
-    # Model 2
+    # Model 2 & Model 3
     "Caries":               (220,  60,  60),   # Red
+    "Crown":                (180,  50, 180),   # Purple
     "Dental Crown":         (180,  50, 180),   # Purple
+    "Filling":              ( 50, 100, 220),   # Blue
     "Dental Filling":       ( 50, 100, 220),   # Blue
     "Dental Implant":       ( 30, 180, 180),   # Cyan
     "Malaligned Tooth":     (220, 220,  30),   # Yellow
@@ -180,11 +202,72 @@ CLASS_COLORS_RGB = {
     "Permanent Retainer":   (180, 180, 180),   # Light grey
     "Post-Core":            (180, 180, 180),   # Light grey
     "Plating":              (180, 180, 180),   # Light grey
-    "Wire":                 (180, 180, 180),   # Light grey
     "Cyst":                 (200,  30,  30),   # Dark red
     "Root Resorption":      (220, 100,  30),   # Orange
     "Primary teeth":        ( 60, 160, 220),   # Blue
+    "Primary Teeth":        ( 60, 160, 220),   # Blue
 }
+
+# ─── Canonical Disease Category Groups for Cross-Model NMS ────────────────────
+CANONICAL_GROUPS = {
+    # Caries
+    "Caries":               "caries",
+    "Occlusal Caries":      "caries",
+    "Proximal Caries":      "caries",
+
+    # Crown
+    "Crown":                "crown",
+    "Dental Crown":         "crown",
+
+    # Filling
+    "Filling":              "filling",
+    "Dental Filling":       "filling",
+
+    # Bone Loss
+    "Bone Loss":            "bone_loss",
+    "Horizontal Bone Loss": "bone_loss",
+    "Vertical Bone Loss":   "bone_loss",
+    "Bone Defect":          "bone_loss",
+
+    # Periapical / Lesions
+    "Periapical Abscess":   "periapical",
+    "Periapical Cyst":      "periapical",
+    "Periapical Lesion":    "periapical",
+    "Granuloma":            "periapical",
+    "Apical Periodontitis": "periapical",
+    "Cyst":                 "periapical",
+
+    # Root Canal
+    "Root Canal Treated":   "root_canal",
+    "Root Canal Treatment": "root_canal",
+
+    # Retained Root
+    "Retained Root":        "retained_root",
+    "Root Piece":           "retained_root",
+    "Root Resorption":      "retained_root",
+
+    # Impacted Tooth
+    "Impacted Tooth":       "impacted",
+
+    # Implant
+    "Dental Implant":       "implant",
+
+    # Missing Teeth
+    "Missing Teeth":        "missing",
+}
+
+
+def _get_canonical_info(model_id: int, cls_id: int):
+    if model_id == 1:
+        name = ALL_CLASSES_M1.get(cls_id, f"Class_{cls_id}")
+    elif model_id == 2:
+        name = ALL_CLASSES_M2.get(cls_id, f"Class_{cls_id}")
+    else:
+        name = ALL_CLASSES_M3.get(cls_id, f"Class_{cls_id}")
+
+    group = CANONICAL_GROUPS.get(name, name.lower().replace(" ", "_"))
+    return name, group
+
 
 FDI_UPPER = [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28]
 FDI_LOWER = [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38]
@@ -196,11 +279,10 @@ DISPLAY_MAX = 0.96
 
 def _scale_confidence(raw_conf: float) -> float:
     """
-    Scale raw model confidence → clinical display range [91%, 96%].
-    Raw range assumed 0.40 – 0.95.
-    Detections below CONF_THRESHOLD (0.69) are already filtered before reaching here.
+    Scale raw model confidence → clinical display range [70%, 89%].
+    Raw range assumed CONF_THRESHOLD – 0.95.
     """
-    raw_low  = 0.40
+    raw_low  = getattr(settings, 'YOLO_CONFIDENCE_THRESHOLD', 0.38)
     raw_high = 0.95
     t = (raw_conf - raw_low) / (raw_high - raw_low)
     t = max(0.0, min(1.0, t))
@@ -218,30 +300,38 @@ def _estimate_fdi(cx_norm: float, cy_norm: float):
 # ══════════════════════════════════════════════════════════════════════════════
 class DentalDetector:
     """
-    Dual-model dental detector running both:
-      1. dental_yolov8.pt (11 classes)
-      2. dental_disease_panoramic/best.pt (31 classes)
-    TTA is executed on both models. Duplicates are resolved via class-aware NMS.
+    Multi-model dental detector running active YOLO models simultaneously:
+      1. Model 1 (runs_dentai_weights_best.pt - 11 classes)
+      2. Model 2 (dental_disease_panoramic/best.pt - 31 classes)
+      3. Model 3 (DentAI_Final.pt - 9 classes)
+    TTA is executed across all available models. Duplicates are resolved via NMS.
     All detections except Milk Tooth / Primary teeth are returned with scaled confidence (70-89%).
-    Detections with raw model confidence below 69% are discarded before enrichment.
     """
 
-    CONF_THRESHOLD = 0.72
+    CONF_THRESHOLD = getattr(settings, 'YOLO_CONFIDENCE_THRESHOLD', 0.38)
     IOU_THRESHOLD  = 0.45
 
     def __init__(self):
-        m1_path = Path(settings.BASE_DIR) / "models" / "dental_yolov8.pt"
+        self.use_new_model_only = getattr(settings, 'USE_NEW_MODEL_ONLY', False)
+        m1_path = Path(getattr(settings, 'YOLO_MODEL_PATH', settings.BASE_DIR / 'models' / 'runs_dentai_weights_best.pt'))
         m2_path = Path(settings.BASE_DIR) / "training" / "raw_datasets" / "dental_disease_panoramic" / "best.pt"
+        m3_path = Path(getattr(settings, 'YOLO_FINAL_MODEL_PATH', settings.BASE_DIR / 'models' / 'DentAI_Final.pt'))
 
-        if not ULTRALYTICS_AVAILABLE or not m1_path.exists() or not m2_path.exists():
+        # Check model existence
+        m1_exists = m1_path.exists()
+        m2_exists = m2_path.exists()
+        m3_exists = m3_path.exists()
+
+        if not ULTRALYTICS_AVAILABLE or not (m1_exists or m3_exists):
             self.fallback = True
             logger.warning("ML Models or ultralytics not found. Using DentAI High-Fidelity Simulation Engine.")
             return
 
         self.fallback = False
         try:
-            self.model = YOLO(str(m1_path))
-            self.model2 = YOLO(str(m2_path))
+            self.model = YOLO(str(m1_path)) if m1_exists else None
+            self.model2 = YOLO(str(m2_path)) if (m2_exists and not self.use_new_model_only) else None
+            self.model3 = YOLO(str(m3_path)) if m3_exists else None
             self._warmup()
         except Exception as e:
             logger.error(f"Failed to load models: {e}. Falling back to simulation.")
@@ -251,8 +341,12 @@ class DentalDetector:
         if getattr(self, 'fallback', False):
             return
         dummy = np.zeros((640, 640, 3), dtype=np.uint8)
-        self.model.predict(source=dummy, conf=0.9, verbose=False)
-        self.model2.predict(source=dummy, conf=0.9, verbose=False)
+        if getattr(self, 'model', None):
+            self.model.predict(source=dummy, conf=0.9, verbose=False)
+        if getattr(self, 'model2', None):
+            self.model2.predict(source=dummy, conf=0.9, verbose=False)
+        if getattr(self, 'model3', None):
+            self.model3.predict(source=dummy, conf=0.9, verbose=False)
 
     # ── Public ────────────────────────────────────────────────────────────────
 
@@ -261,13 +355,11 @@ class DentalDetector:
         if getattr(self, 'fallback', False):
             import random
             import hashlib
-            # Generate deterministic but realistic pathologies per image (using MD5 file content hash to avoid Python process hash randomization)
             try:
                 with open(image_path, 'rb') as f:
                     content_hash = hashlib.md5(f.read()).hexdigest()
                 seed = int(content_hash, 16) % (2**32)
             except Exception:
-                # Fallback to name hash if file read fails
                 seed = int(hashlib.md5(Path(image_path).name.encode('utf-8')).hexdigest(), 16) % (2**32)
             random.seed(seed)
             
@@ -317,9 +409,9 @@ class DentalDetector:
                     "secondary_caries": False,
                 },
                 {
-                    "disease_name": "Root Canal Required",
+                    "disease_name": "Root Canal Treated",
                     "confidence": _scale_confidence(random.uniform(0.75, 0.92)),
-                    "severity": "high",
+                    "severity": "low",
                     "bbox": {"x1": 0.15, "y1": 0.52, "x2": 0.20, "y2": 0.62},
                     "fdi_tooth_number": 36,
                     "filling_present": False,
@@ -343,7 +435,7 @@ class DentalDetector:
             return {
                 "detections": dets,
                 "inference_time_ms": random.randint(120, 240),
-                "model_version": "DentAI-v2-SimulationEngine",
+                "model_version": "DentAI-v3-SimulationEngine",
             }
 
         raw   = self._run_tta(image_path)
@@ -352,7 +444,7 @@ class DentalDetector:
         return {
             "detections":        dets,
             "inference_time_ms": int((time.time() - start) * 1000),
-            "model_version":     "DentAI-v2-DualModel-TTA",
+            "model_version":     "DentAI-v3-MultiModel-Simultaneous-TTA",
         }
 
     # ── TTA ───────────────────────────────────────────────────────────────────
@@ -373,49 +465,63 @@ class DentalDetector:
         return all_dets
 
     def _predict_array(self, img: np.ndarray, flipped: bool = False) -> list:
-        results1 = self.model.predict(
-            source=img, conf=self.CONF_THRESHOLD,
-            iou=self.IOU_THRESHOLD, save=False, verbose=False,
-            imgsz=1024
-        )
-        results2 = self.model2.predict(
-            source=img, conf=self.CONF_THRESHOLD,
-            iou=self.IOU_THRESHOLD, save=False, verbose=False,
-            imgsz=1024
-        )
-
         dets = []
-        if results1:
-            for box in results1[0].boxes:
+
+        def _add_boxes(results, model_id):
+            if not results:
+                return
+            for box in results[0].boxes:
+                conf = float(box.conf[0])
+                if conf < self.CONF_THRESHOLD:
+                    continue
+                cls_id = int(box.cls[0])
+                name, canonical = _get_canonical_info(model_id, cls_id)
                 x1, y1, x2, y2 = box.xyxyn[0].tolist()
                 if flipped:
                     x1, x2 = 1.0 - x2, 1.0 - x1
                 dets.append({
-                    "model_id": 1,
-                    "cls_id":   int(box.cls[0]),
-                    "conf":     float(box.conf[0]),
+                    "model_id":       model_id,
+                    "cls_id":         cls_id,
+                    "disease_name":   name,
+                    "canonical_group": canonical,
+                    "conf":           conf,
                     "x1": x1, "y1": y1, "x2": x2, "y2": y2,
-                    "cx": (x1+x2)/2, "cy": (y1+y2)/2,
+                    "cx": (x1 + x2) / 2, "cy": (y1 + y2) / 2,
                 })
 
-        if results2:
-            for box in results2[0].boxes:
-                x1, y1, x2, y2 = box.xyxyn[0].tolist()
-                if flipped:
-                    x1, x2 = 1.0 - x2, 1.0 - x1
-                dets.append({
-                    "model_id": 2,
-                    "cls_id":   int(box.cls[0]),
-                    "conf":     float(box.conf[0]),
-                    "x1": x1, "y1": y1, "x2": x2, "y2": y2,
-                    "cx": (x1+x2)/2, "cy": (y1+y2)/2,
-                })
+        # Model 1
+        if getattr(self, 'model', None):
+            res1 = self.model.predict(
+                source=img, conf=self.CONF_THRESHOLD,
+                iou=self.IOU_THRESHOLD, save=False, verbose=False,
+                imgsz=1024
+            )
+            _add_boxes(res1, 1)
+
+        # Model 2
+        if getattr(self, 'model2', None):
+            res2 = self.model2.predict(
+                source=img, conf=self.CONF_THRESHOLD,
+                iou=self.IOU_THRESHOLD, save=False, verbose=False,
+                imgsz=1024
+            )
+            _add_boxes(res2, 2)
+
+        # Model 3 (DentAI_Final.pt)
+        if getattr(self, 'model3', None):
+            res3 = self.model3.predict(
+                source=img, conf=self.CONF_THRESHOLD,
+                iou=self.IOU_THRESHOLD, save=False, verbose=False,
+                imgsz=1024
+            )
+            _add_boxes(res3, 3)
 
         return dets
 
-    # ── NMS ───────────────────────────────────────────────────────────────────
+    # ── Multi-Tier Cross-Model NMS ───────────────────────────────────────────
 
     def _apply_nms(self, raw: list) -> list:
+<<<<<<< HEAD
         from collections import defaultdict
         
         # Group by super-class to perform cross-model fusion and deduplicate overlapping boxes
@@ -461,14 +567,50 @@ class DentalDetector:
         for key, boxes in per_group.items():
             final.extend(self._nms_class(boxes))
         return final
+=======
+        if not raw:
+            return []
+>>>>>>> 0d0bed9 (Deploy multi-model inference and cross-model NMS deduplication to Vercel)
 
-    def _nms_class(self, boxes: list) -> list:
+        # Filter out healthy / normal structures early
+        skip_names = {"Milk Tooth", "Primary teeth", "Primary Teeth", "Healthy", "Permanent Tooth"}
+        candidates = [d for d in raw if d.get("disease_name") not in skip_names]
+
+        # 1. Canonical Category Cross-Model NMS (IoU threshold = 0.35)
+        from collections import defaultdict
+        per_canonical = defaultdict(list)
+        for d in candidates:
+            per_canonical[d["canonical_group"]].append(d)
+
+        canonical_kept = []
+        for group_name, boxes in per_canonical.items():
+            canonical_kept.extend(self._nms_box_list(boxes, iou_thresh=0.35))
+
+        # 2. Global Spatial Cross-Category Overlap Suppression (IoU threshold = 0.45)
+        global_kept = self._nms_box_list(canonical_kept, iou_thresh=0.45)
+
+        # 3. Tooth Position (FDI) + Canonical Category Deduplication
+        fdi_kept = []
+        fdi_seen = set()
+        global_kept = sorted(global_kept, key=lambda b: b["conf"], reverse=True)
+        for b in global_kept:
+            fdi = _estimate_fdi(b["cx"], b["cy"])
+            key = (fdi, b["canonical_group"]) if fdi else None
+            if key and key in fdi_seen:
+                continue
+            if key:
+                fdi_seen.add(key)
+            fdi_kept.append(b)
+
+        return fdi_kept
+
+    def _nms_box_list(self, boxes: list, iou_thresh: float) -> list:
         boxes = sorted(boxes, key=lambda b: b["conf"], reverse=True)
         kept  = []
         while boxes:
             best = boxes.pop(0)
             kept.append(best)
-            boxes = [b for b in boxes if self._iou(best, b) < self.IOU_THRESHOLD]
+            boxes = [b for b in boxes if self._iou(best, b) < iou_thresh]
         return kept
 
     @staticmethod
@@ -494,16 +636,18 @@ class DentalDetector:
                 continue
             if model_id == 2 and cls_id == 30:
                 continue
+            if model_id == 3 and cls_id == 5:
+                continue
 
             if model_id == 1:
                 name = ALL_CLASSES_M1.get(cls_id, f"Class_{cls_id}")
                 is_path = cls_id in PATHOLOGY_IDS_M1
-                is_rest = False
+                is_rest = (cls_id == 8)
                 is_struct = False
                 is_fill = False
                 is_cr = False
                 is_imp = False
-            else:
+            elif model_id == 2:
                 name = ALL_CLASSES_M2.get(cls_id, f"Class_{cls_id}")
                 is_path = cls_id in PATHOLOGY_IDS_M2
                 is_rest = (cls_id in RESTORATION_IDS_M2 or cls_id in HARDWARE_IDS_M2)
@@ -511,6 +655,14 @@ class DentalDetector:
                 is_fill = (cls_id == 2)
                 is_cr = (cls_id == 1)
                 is_imp = (cls_id == 3)
+            else:
+                name = ALL_CLASSES_M3.get(cls_id, f"Class_{cls_id}")
+                is_path = cls_id in PATHOLOGY_IDS_M3
+                is_rest = cls_id in RESTORATION_IDS_M3
+                is_struct = cls_id in STRUCTURAL_IDS_M3
+                is_fill = (cls_id == 2)
+                is_cr = (cls_id == 1)
+                is_imp = (cls_id == 8)
 
             fdi   = _estimate_fdi(det["cx"], det["cy"])
             sev   = SEVERITY_MAP.get(name, "low")
